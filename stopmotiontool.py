@@ -197,8 +197,8 @@ if __name__== "__main__":
         screen = pygame.display.set_mode((1280,720), pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
     else :
         os.putenv('SDL_VIDEODRIVER', 'fbcon')
-        pygame.display.init()
-        screen = pygame.display.set_mode((1,1))
+        # pygame.display.init()
+        # screen = pygame.display.set_mode((1,1))
         
     # loop
     finish = False
