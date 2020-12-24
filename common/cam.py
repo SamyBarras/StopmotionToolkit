@@ -10,9 +10,9 @@ import psutil
 import numpy as np
 from threading import Thread, Timer
 
-import common.constants
-from common.user_settings import *
-from common.image_processing import *
+import common.constants as constants
+import common.user_settings as user_settings
+import common.image_processing as image_processing
 
 class cam(object):
     global ostype
@@ -58,9 +58,9 @@ class cam(object):
         filename = os.path.join(target,"HQ",fname)
         cv2.imwrite(filename, tmp_frame)
         filename = os.path.join(target,fname)
-        cv2.imwrite(filename, rescaleImg(tmp_frame,50))
+        cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
         print("{} written!".format(filename))
-        self.lastframe = rescaleToDisplay(tmp_frame, display)
+        self.lastframe = image_processing.rescaleToDisplay(tmp_frame, display)
         self.frameCount += 1
         
     
@@ -90,9 +90,3 @@ def streamConstrutor (id):
     cap.read()
     return cap
 
-if __name__== "__main__":
-    import os, pygame, cv2, collections
-    from threading import Thread
-    from common.image_processing import *
-    from common.constants import *
-    from common.user_settings import *

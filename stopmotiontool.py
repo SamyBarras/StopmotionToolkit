@@ -10,11 +10,7 @@ import psutil
 import numpy as np
 from threading import Thread, Timer
 # custom imports
-from common.constants import *
-from common.user_settings import *
-from common.cam import *
-import common.image_processing as mod
-import common.gpio as gpio
+from common import *
 
 
 def detectOS ():
@@ -36,7 +32,7 @@ def setupDir():
     print("==== setup working dir =====")
     partitions = psutil.disk_partitions()
     drivesize = 0
-    regEx = '\A' + drives[ostype]
+    regEx = '\A' + constants.drives[ostype]
     found = False
     #print(drives[ostype])
     for p in partitions :
@@ -58,7 +54,7 @@ def setupDir():
             # 0 and 1 are OSX and Linux systems
             drivepath = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
     
-    workingdir = os.path.join(drivepath, "stopmotion", datetime.datetime.now().strftime('%Y_%m_%d/%H%M%S')+"_"+project_name)
+    workingdir = os.path.join(drivepath, "stopmotion", datetime.datetime.now().strftime('%Y_%m_%d/%H%M%S')+"_" + user_settings.project_name)
     if not os.path.exists(workingdir):
         os.makedirs(workingdir)
     
@@ -78,9 +74,9 @@ def getCameraDevice():
     res_w = 0
     arr = []
     print("==== setup camera =====")
-    if forceCamera is True :
+    if user_settings.forceCamera is True :
         # camera to use is defined by user settings
-        cap = streamConstructor (camIndex, ostype, camera_codec)
+        cap = cam.streamConstructor (camIndex, ostype, user_settings.camera_codec)
         if cap.read()[0]:
             arr = [camIndex, cap.get(3), cap.get(4)]
             cap.release()
@@ -93,7 +89,7 @@ def getCameraDevice():
         r = (0, 4)
         for i in range(r[0], r[1]):
             tmp = None
-            cap = streamConstructor (i, ostype)
+            cap = cam.streamConstructor (i, ostype)
             if cap.read()[0]:
                 tmp_w = cap.get(3)
                 tmp_h = cap.get(4)
@@ -166,18 +162,18 @@ def displayAnimation():
         for i in frames : # frames is pygame.surface array            
             screen.blit(i, (0, 0))
             pygame.display.flip()
-            time.sleep(1/FPS) # to keep framerate
+            time.sleep(1/user_settings.FPS) # to keep framerate
         IS_PLAYING=False
 
 def displayCameraStream(buffer):
     # display video stream
     if buffer is not None:
-        screen.blit(rescaleToDisplay(buffer, screen), (0, 0))
+        screen.blit(image_processing.rescaleToDisplay(buffer, screen), (0, 0))
 
     # display onion skin
-    if ONIONSKIN >= 1 :
+    if user_settings.ONIONSKIN >= 1 :
         # if onion skin set, we show previous frames with less opacity
-        f = ONIONSKIN
+        f = user_settings.ONIONSKIN
         while f > 0 :
             if len(frames) >= f :
                 alpha = 255/int(f+1)
@@ -189,14 +185,14 @@ def displayCameraStream(buffer):
                 pass
             f -= 1
     
-    if show_console is True :
+    if user_settings.show_console is True :
         screen.blit(textsurface,(25,25))
         screen.blit(fpsconsole, (25,60))
     
     pygame.display.flip()
 
 if __name__== "__main__":
-    global IS_SHOOTING, IS_PLAYING
+    global IS_SHOOTING, IS_PLAYING, frames
     # pygame
     pygame.init()
     clock = pygame.time.Clock()
@@ -207,7 +203,7 @@ if __name__== "__main__":
     outputDisplay, w, h = getMonitor () # boolean, width, height
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
-    maxFramesBuffer = int(PREVIEW_DURATION*FPS)
+    maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
     frames = collections.deque(maxlen=maxFramesBuffer)
     # GPIO initialisation
     if ostype == 0 :
@@ -217,7 +213,7 @@ if __name__== "__main__":
         leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
-    myCamera = cam(video_device, ostype, camera_codec) # video_device, os, codec, buffer
+    myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded
 
     # not in headless mode
@@ -256,7 +252,7 @@ if __name__== "__main__":
                 if event.type == KEYDOWN :
                     if event.key == K_t :
                         IS_SHOOTING = True
-                        myCamera.capture(screen, workingdir, take_name)
+                        myCamera.capture(screen, workingdir, user_settings.take_name)
                         frames.append(myCamera.lastframe)
                         IS_SHOOTING = False
                     if event.key == K_p :
@@ -271,7 +267,7 @@ def quit ():
     if ostype == 0 :
         GPIO.cleanup()
     # export animation before quitting totally
-    mod.compileAnimation(workingdir, frames, take_name)
+    image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
     # finally, we quit !
     sys.exit()     
 
