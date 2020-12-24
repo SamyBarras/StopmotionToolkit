@@ -14,6 +14,7 @@ from common.constants import *
 from common.user_settings import *
 from common.cam import *
 import common.image_processing as mod
+import gpio
 
 
 def detectOS ():
