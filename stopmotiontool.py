@@ -135,26 +135,26 @@ def getMonitor ():
             
 def setupGpio():
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(constant.SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(constant.SHOT_BUTTON, GPIO.FALLING, callback=actionButtn)
-    GPIO.setup(constant.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(constant.PLAY_BUTTON, GPIO.FALLING, callback=actionButtn)
-    GPIO.setup(constant.OUTPUT_LED, GPIO.OUT) # SHOT_LED
+    GPIO.setup(constants.SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(constants.SHOT_BUTTON, GPIO.FALLING, callback=actionButtn)
+    GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(constants.PLAY_BUTTON, GPIO.FALLING, callback=actionButtn)
+    GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
 
 def ledBlink ():
     global IS_SHOOTING, IS_PLAYING
     while True :
         if IS_SHOOTING is True:
             print("is shooting")
-            GPIO.output(constant.OUTPUT_LED,GPIO.HIGH)
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
             time.sleep(0.2)
-            GPIO.output(constant.OUTPUT_LED,GPIO.LOW)
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             time.sleep(0.2)
         elif IS_PLAYING is True :
             print("is playing")
-            GPIO.output(constant.OUTPUT_LED,GPIO.LOW)
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
-            GPIO.output(constant.OUTPUT_LED,GPIO.HIGH)
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
 
 def displayAnimation():
     global IS_PLAYING
