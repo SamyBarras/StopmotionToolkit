@@ -190,7 +190,7 @@ if __name__== "__main__":
     # GPIO initialisation
     if ostype == 0 :
         gpio.setup()
-        leds = Thread(target=ledBlink, daemon=True)
+        leds = Thread(target=gpio.ledBlink, daemon=True)
         leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
