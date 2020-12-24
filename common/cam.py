@@ -10,7 +10,7 @@ import psutil
 import numpy as np
 from threading import Thread, Timer
 
-from common.constants import *
+import common.constants
 from common.user_settings import *
 from common.image_processing import *
 
@@ -53,7 +53,6 @@ class cam(object):
                 return
     
     def capture(self, display, target, name):
-        global screen
         tmp_frame = self.read()
         fname = "{}_{}.png".format(name, str(self.frameCount).zfill(5))
         filename = os.path.join(target,"HQ",fname)

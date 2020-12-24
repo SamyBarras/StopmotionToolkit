@@ -137,7 +137,28 @@ def getMonitor ():
     else :
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
             
+def setupGpio():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(constant.SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(constant.SHOT_BUTTON, GPIO.FALLING, callback=actionButtn)
+    GPIO.setup(constant.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(constant.PLAY_BUTTON, GPIO.FALLING, callback=actionButtn)
+    GPIO.setup(constant.OUTPUT_LED, GPIO.OUT) # SHOT_LED
 
+def ledBlink ():
+    global IS_SHOOTING, IS_PLAYING
+    while True :
+        if IS_SHOOTING is True:
+            print("is shooting")
+            GPIO.output(constant.OUTPUT_LED,GPIO.HIGH)
+            time.sleep(0.2)
+            GPIO.output(constant.OUTPUT_LED,GPIO.LOW)
+            time.sleep(0.2)
+        elif IS_PLAYING is True :
+            print("is playing")
+            GPIO.output(constant.OUTPUT_LED,GPIO.LOW)
+        else :
+            GPIO.output(constant.OUTPUT_LED,GPIO.HIGH)
 
 def displayAnimation():
     global IS_PLAYING
@@ -175,6 +196,7 @@ def displayCameraStream(buffer):
     pygame.display.flip()
 
 if __name__== "__main__":
+    global IS_SHOOTING, IS_PLAYING
     # pygame
     pygame.init()
     clock = pygame.time.Clock()
@@ -190,8 +212,8 @@ if __name__== "__main__":
     # GPIO initialisation
     if ostype == 0 :
         import RPi.GPIO as GPIO
-        gpio.setup()
-        leds = Thread(target=gpio.ledBlink, daemon=True)
+        setupGpio()
+        leds = Thread(target=ledBlink, daemon=True)
         leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
@@ -233,8 +255,10 @@ if __name__== "__main__":
                     finish = True
                 if event.type == KEYDOWN :
                     if event.key == K_t :
+                        IS_SHOOTING = True
                         myCamera.capture(screen, workingdir, take_name)
                         frames.append(myCamera.lastframe)
+                        IS_SHOOTING = False
                     if event.key == K_p :
                         IS_PLAYING = True
                     if event.key == K_q or event.key == K_ESCAPE:

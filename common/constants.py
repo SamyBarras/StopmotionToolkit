@@ -8,4 +8,5 @@ drives = ["/media/pi","/Volumes",""]
 # other global vars
 frames = None # framebuffer for animation
 IS_PLAYING = False
+IS_SHOOTING = False
 SCREEN_SIZE = (0,0)
