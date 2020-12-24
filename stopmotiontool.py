@@ -108,12 +108,18 @@ def getCameraDevice():
 
 
 def getMonitor ():
+    print("==== setup output display =====")
     import gi
+    print(0)
     gi.require_version("Gdk", "3.0")
+    print(1)
     from gi.repository import Gdk
+    print(2)
     
     allmonitors = []
     gdkdsp = Gdk.Display.get_default()
+
+    print(3)
     if gdkdsp is not None :
         monitors = gdkdsp.get_n_monitors()
         for i in range(monitors):
@@ -127,6 +133,8 @@ def getMonitor ():
                 ]
             ])
         print("screens : ", allmonitors)
+    
+    print(4)
     if len(allmonitors) > 0 :
         #SCREEN_SIZE = (allmonitors[0][3],allmonitors[0][4])
         return True, geo.width, geo.height
