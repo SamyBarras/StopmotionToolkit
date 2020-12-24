@@ -114,8 +114,8 @@ def getMonitor ():
     
     allmonitors = []
     gdkdsp = Gdk.Display.get_default()
-    monitors = gdkdsp.get_n_monitors()
-    if monitors is not None :
+    if gdkdsp is not None :
+        monitors = gdkdsp.get_n_monitors()
         for i in range(monitors):
             monitor = gdkdsp.get_monitor(i)
             print(monitor)
