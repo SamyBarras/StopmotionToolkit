@@ -199,7 +199,7 @@ if __name__== "__main__":
         screen = pygame.display.set_mode((1280,720), pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
     else :
         print("no display found")
-        #screen = pygame.display.set_mode((1,1))
+        screen = pygame.display.set_mode((1,1))
         
     # loop
     finish = False
