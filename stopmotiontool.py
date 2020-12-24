@@ -114,8 +114,9 @@ def getMonitor ():
     
     allmonitors = []
     gdkdsp = Gdk.Display.get_default()
-    if gdkdsp is not None :
-        for i in range(gdkdsp.get_n_monitors()):
+    monitors = gdkdsp.get_n_monitors()
+    if monitors is not None :
+        for i in range(monitors):
             monitor = gdkdsp.get_monitor(i)
             scale = monitor.get_scale_factor()
             geo = monitor.get_geometry()
