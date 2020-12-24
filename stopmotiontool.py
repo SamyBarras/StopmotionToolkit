@@ -133,8 +133,9 @@ def getMonitor ():
                 ]
             ])
         print("screens : ", allmonitors)
-    
-    print(4)
+    else :
+        return False, 0 , 0
+
     if len(allmonitors) > 0 :
         #SCREEN_SIZE = (allmonitors[0][3],allmonitors[0][4])
         return True, geo.width, geo.height
@@ -189,7 +190,6 @@ if __name__== "__main__":
     pygame.init()
     pygame.font.init()
     myfont = pygame.font.SysFont('Helvetica', 15)
-    pygame.display.set_caption('stopmotion project')
     clock = pygame.time.Clock()
     start_time = pygame.time.get_ticks()
     # frames buffer for animation preview--> ring buffer # duration in seconds for animation preview (last X seconds)
@@ -208,7 +208,8 @@ if __name__== "__main__":
     else :
         print("no display found")
         screen = pygame.display.set_mode((1,1))
-        
+    
+    pygame.display.set_caption('stopmotion project')        
     # loop
     finish = False
     is_playing = False
