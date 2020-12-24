@@ -74,7 +74,6 @@ def setupDir():
         quit()
 
 def getCameraDevice():
-    bestcamId = None
     res_w = 0
     arr = []
     print("==== setup camera =====")
@@ -115,18 +114,19 @@ def getMonitor ():
     
     allmonitors = []
     gdkdsp = Gdk.Display.get_default()
-    for i in range(gdkdsp.get_n_monitors()):
-        monitor = gdkdsp.get_monitor(i)
-        scale = monitor.get_scale_factor()
-        geo = monitor.get_geometry()
-        allmonitors.append([
-            monitor.is_primary()] + [n * scale for n in [
-                geo.x, geo.y, geo.width, geo.height
-            ]
-        ])
-    print("screens : ", allmonitors)
+    if gdkdsp is not None :
+        for i in range(gdkdsp.get_n_monitors()):
+            monitor = gdkdsp.get_monitor(i)
+            scale = monitor.get_scale_factor()
+            geo = monitor.get_geometry()
+            allmonitors.append([
+                monitor.is_primary()] + [n * scale for n in [
+                    geo.x, geo.y, geo.width, geo.height
+                ]
+            ])
+        print("screens : ", allmonitors)
     if len(allmonitors) > 0 :
-        SCREEN_SIZE = (allmonitors[0][3],allmonitors[0][4])
+        #SCREEN_SIZE = (allmonitors[0][3],allmonitors[0][4])
         return True, geo.width, geo.height
     else :
         return False, 0 ,0
@@ -134,7 +134,6 @@ def getMonitor ():
 
 def displayAnimation():
     global is_playing
-    current_time = pygame.time.get_ticks()
     while is_playing :
         for i in frames : # frames is pygame.surface array            
             screen.blit(i, (0, 0))
