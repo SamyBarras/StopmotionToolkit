@@ -189,6 +189,7 @@ if __name__== "__main__":
     frames = collections.deque(maxlen=maxFramesBuffer)
     # GPIO initialisation
     if ostype == 0 :
+        import RPi.GPIO as GPIO
         gpio.setup()
         leds = Thread(target=gpio.ledBlink, daemon=True)
         leds.start()
@@ -243,6 +244,8 @@ if __name__== "__main__":
 def quit ():
     myCamera.release()
     pygame.quit()
+    if ostype == 0 :
+        GPIO.cleanup()
     # export animation before quitting totally
     mod.compileAnimation(workingdir, frames, take_name)
     # finally, we quit !
