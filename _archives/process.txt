@@ -1,0 +1,24 @@
+- check if arm
+- check if headless
+- check if camera
+- check if usb drive
+
+if arm :
+	setup gpio
+	if camera :
+		setup camera and get resolution
+		run camera and stream video to tmp_file as thread
+		if not headless :
+			show camera stream
+	if GPIO callback :
+		take picture
+		if USB drive :
+			save pics to usb drive
+		else : save in local dir
+		if not headless :
+			update onion skin
+		
+
+else :
+	quit()
+
