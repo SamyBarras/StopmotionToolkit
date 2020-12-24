@@ -118,6 +118,7 @@ def getMonitor ():
     if monitors is not None :
         for i in range(monitors):
             monitor = gdkdsp.get_monitor(i)
+            print(monitor)
             scale = monitor.get_scale_factor()
             geo = monitor.get_geometry()
             allmonitors.append([
