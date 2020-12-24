@@ -109,38 +109,29 @@ def getCameraDevice():
 
 def getMonitor ():
     print("==== setup output display =====")
-    import gi
-    print(0)
-    gi.require_version("Gdk", "3.0")
-    print(1)
-    from gi.repository import Gdk
-    print(2)
-    
-    allmonitors = []
-    gdkdsp = Gdk.Display.get_default()
-
-    print(3)
-    if gdkdsp is not None :
-        monitors = gdkdsp.get_n_monitors()
-        for i in range(monitors):
-            monitor = gdkdsp.get_monitor(i)
-            print(monitor)
-            scale = monitor.get_scale_factor()
-            geo = monitor.get_geometry()
-            allmonitors.append([
-                monitor.is_primary()] + [n * scale for n in [
-                    geo.x, geo.y, geo.width, geo.height
-                ]
-            ])
-        print("screens : ", allmonitors)
+    if ostype == 0 :
+        #raspberry pi
+        drivers = ('directfb', 'fbcon', 'svgalib')
+        found = False
+        for driver in drivers:
+            print("Trying \'" + driver + "\'")
+            if not os.getenv('SDL_VIDEODRIVER'):
+                os.putenv('SDL_VIDEODRIVER',driver)
+            try:
+                pygame.display.init()
+            except pygame.error:
+                print('failed')
+                continue
+            found = True
+            break
+        if not found:
+            raise Exception('No suitable video driver found.')
+            return False, 0, 0
+        else :
+            return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
-        return False, 0 , 0
-
-    if len(allmonitors) > 0 :
-        #SCREEN_SIZE = (allmonitors[0][3],allmonitors[0][4])
-        return True, geo.width, geo.height
-    else :
-        return False, 0 ,0
+        return True, pygame.display.Info().current_w, pygame.display.Info().current_h
+            
 
 
 def displayAnimation():
@@ -181,13 +172,11 @@ def displayCameraStream(buffer):
 if __name__== "__main__":
     global ostype
     # setup
+    pygame.init()
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
     workingdir = setupDir()             # path of working dir
     outputDisplay, w, h = getMonitor () # boolean, width, height
     # pygame
-    if outputDisplay is False:
-        os.environ["SDL_VIDEODRIVER"] = "dummy"
-    pygame.init()
     pygame.font.init()
     myfont = pygame.font.SysFont('Helvetica', 15)
     clock = pygame.time.Clock()
@@ -204,7 +193,7 @@ if __name__== "__main__":
     
     # window if outputdisplay is available
     if outputDisplay is True:
-        screen = pygame.display.set_mode((1280,720), pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode((w,h), pygame.FULLSCREEN) #pygame.RESIZABLE pygame.FULLSCREEN
     else :
         print("no display found")
         os.putenv('SDL_VIDEODRIVER', 'fbcon')
