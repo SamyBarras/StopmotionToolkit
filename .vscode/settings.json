@@ -1,3 +1,7 @@
 {
-    "python.pythonPath": "/usr/local/bin/python3"
+    "python.pythonPath": "/usr/local/bin/python3",
+    "python.linting.pylintArgs": [
+        "--extension-pkg-whitelist=pygame",
+        "--erros-only"
+    ]
 }

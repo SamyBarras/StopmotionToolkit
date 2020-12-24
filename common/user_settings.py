@@ -11,7 +11,6 @@ camIndex = 0
 # CAMERA CODEC
 # change this if your camera do not give proper resolution
 camera_codec = 'MJPG'
-
 #
 project_name = "test"
 take_name = "take01"

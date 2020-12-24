@@ -14,7 +14,7 @@ from common.user_settings import *
 today = datetime.date.today()
 
 class Capture(object):
-    global is_playing, frames, workingdir, HQFilesDir, IS_SHOOTING, SCREEN_SIZE
+    global IS_PLAYING, frames, workingdir, HQFilesDir, IS_SHOOTING, SCREEN_SIZE
     def __init__(self,camRes):
         self.size = camRes
         # if use of picamera, we need to update this part !
@@ -78,11 +78,11 @@ def displayOnionSkin():
     return
     
 def playBufferAnimation():
-    global is_playing, start_time
-    if not(is_playing): #block animation event while animation is running
-        is_playing=True
+    global IS_PLAYING, start_time
+    if not(IS_PLAYING): #block animation event while animation is running
+        IS_PLAYING=True
         print("[INFO] Play animation")        
-        while is_playing :
+        while IS_PLAYING :
             current_time = pygame.time.get_ticks()
             for img in frames:
                     start = time.time()
@@ -91,7 +91,7 @@ def playBufferAnimation():
                     end = time.time()
                     time.sleep(1/FPS) # to keep framerate
                     #print("display take:", end-start,"seconds")
-            is_playing=False
+            IS_PLAYING=False
 
 def testDrive():
     global HQFilesDir
@@ -157,14 +157,14 @@ def actionButtn(inputbttn):
 
 
 def blinkLed ():
-    global IS_SHOOTING, is_playing
+    global IS_SHOOTING, IS_PLAYING
     while True :
         if IS_SHOOTING is True:
             GPIO.output(OUTPUT_LED,GPIO.HIGH)
             time.sleep(0.2)
             GPIO.output(OUTPUT_LED,GPIO.LOW)
             time.sleep(0.2)
-        elif is_playing is True :
+        elif IS_PLAYING is True :
             GPIO.output(OUTPUT_LED,GPIO.LOW)
         else :
             GPIO.output(OUTPUT_LED,GPIO.HIGH)
@@ -195,7 +195,7 @@ def setupGpio():
     GPIO.setup(OUTPUT_LED, GPIO.OUT) # SHOT_LED
     
 if __name__== "__main__":
-    global start_time, is_playing, workingdir, IS_SHOOTING, SCREEN_SIZE
+    global start_time, IS_PLAYING, workingdir, IS_SHOOTING, SCREEN_SIZE
     # startup action
     #myCamera.main()
     try :
@@ -227,12 +227,12 @@ if __name__== "__main__":
         #
         myCamera = Capture(camres)
         IS_SHOOTING = False
-        is_playing = False
+        IS_PLAYING = False
         leds = Thread(target=blinkLed, daemon=True)
         leds.start()
         run = True
         while run :
-            if not(is_playing):
+            if not(IS_PLAYING):
                 displayOnionSkin()
                 myCamera.videoStreamCapture()
             # update screen     

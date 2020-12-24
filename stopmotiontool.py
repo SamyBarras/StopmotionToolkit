@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # customs imports
-import sys, os, time, shutil, collections, re, datetime
+import sys, os, time, collections, re, datetime
 # dependencies
 import pygame
 import pygame.camera
@@ -13,7 +13,7 @@ from threading import Thread, Timer
 from common.constants import *
 from common.user_settings import *
 from common.cam import *
-from common.image_processing import *
+import common.image_processing as mod
 
 
 def detectOS ():
@@ -45,9 +45,9 @@ def setupDir():
         # search for external drive according to OS "drivepath"
         # filter size of external drives to keep the one which has more free space
         if tmp is not None and  psize > drivesize:
-                drivepath = p.mountpoint
-                drivesize = psize
-                found = True
+            drivepath = p.mountpoint
+            drivesize = psize
+            found = True
     if found is False :
         print("Working directory will be saved in /Desktop")
         if ostype == 2 :
@@ -79,10 +79,14 @@ def getCameraDevice():
     print("==== setup camera =====")
     if forceCamera is True :
         # camera to use is defined by user settings
-        cap = cv2.VideoCapture(camIndex)
-        arr = [camIndex,cap.get(3),cap.get(4)]
-        cap.release()
-        return arr
+        cap = streamConstructor (camIndex, ostype, camera_codec)
+        if cap.read()[0]:
+            arr = [camIndex, cap.get(3), cap.get(4)]
+            cap.release()
+            return arr
+        else :
+            print("no camera found !")
+            quit()
     else :
         id = -1
         r = (0, 4)
@@ -135,13 +139,13 @@ def getMonitor ():
 
 
 def displayAnimation():
-    global is_playing
-    while is_playing :
+    global IS_PLAYING
+    while IS_PLAYING :
         for i in frames : # frames is pygame.surface array            
             screen.blit(i, (0, 0))
             pygame.display.flip()
             time.sleep(1/FPS) # to keep framerate
-        is_playing=False
+        IS_PLAYING=False
 
 def displayCameraStream(buffer):
     # display video stream
@@ -170,66 +174,77 @@ def displayCameraStream(buffer):
     pygame.display.flip()
 
 if __name__== "__main__":
-    global ostype
-    # setup
+    # pygame
     pygame.init()
+    clock = pygame.time.Clock()
+    start_time = pygame.time.get_ticks()
+    # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
     workingdir = setupDir()             # path of working dir
     outputDisplay, w, h = getMonitor () # boolean, width, height
-    # pygame
-    pygame.font.init()
-    myfont = pygame.font.SysFont('Helvetica', 15)
-    clock = pygame.time.Clock()
-    start_time = pygame.time.get_ticks()
-    # frames buffer for animation preview--> ring buffer # duration in seconds for animation preview (last X seconds)
+    # frames buffer for animation preview
+    # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(PREVIEW_DURATION*FPS)
     frames = collections.deque(maxlen=maxFramesBuffer)
+    # GPIO initialisation
+    if ostype == 0 :
+        setupGpio()
+        leds = Thread(target=ledBlink, daemon=True)
+        leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam(video_device, ostype, camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded
 
-    textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
-    
-    # window if outputdisplay is available
+    # not in headless mode
     if outputDisplay is True:
-        screen = pygame.display.set_mode((w,h), pygame.FULLSCREEN) #pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.FULLSCREEN) #pygame.RESIZABLE pygame.FULLSCREEN
+        # font and info elements
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Helvetica', 15)
+        textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
+        pygame.display.set_caption('stopmotion project')
     else :
-        print("no display found")
-        os.putenv('SDL_VIDEODRIVER', 'fbcon')
-        pygame.display.init()
-        screen = pygame.display.set_mode((1,1))
-    
-    pygame.display.set_caption('stopmotion project')        
-    # loop
+        print("==> stopmotion tool run in headless mode !")
+            
+    # main loop
     finish = False
-    is_playing = False
+    IS_PLAYING = False
     while not finish:
+        # function which do not need output display
         clock.tick(50)
         frameBuffer = myCamera.read()
-        fpsconsole = myfont.render(str(clock.get_fps()), False, (250, 0, 0))
-        # then function needed only if output display is set
+        # to place here : gpio functions
+        if ostype == 0 :
+            print("GPIO functions here")
+        # then function needed only if output display is available (we have a screen)
         if outputDisplay is True :
-            if is_playing is True :
+            fpsconsole = myfont.render(str(clock.get_fps()), False, (250, 0, 0))
+            if IS_PLAYING is True :
                 displayAnimation()
             else :
                 displayCameraStream(frameBuffer)
             
-        # pygame events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                finish = True
-            if event.type == KEYDOWN :
-                if event.key == K_t :
-                    myCamera.capture(screen, workingdir, take_name)
-                    frames.append(myCamera.lastframe)
-                if event.key == K_p :
-                    is_playing = True
-                if event.key == K_q or event.key == K_ESCAPE:
+            # pygame events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     finish = True
-        
+                if event.type == KEYDOWN :
+                    if event.key == K_t :
+                        myCamera.capture(screen, workingdir, take_name)
+                        frames.append(myCamera.lastframe)
+                    if event.key == K_p :
+                        IS_PLAYING = True
+                    if event.key == K_q or event.key == K_ESCAPE:
+                        finish = True
 
+
+def quit ():
     myCamera.release()
-    cv2.destroyAllWindows()
     pygame.quit()
-    sys.exit()
+    # export animation before quitting totally
+    mod.compileAnimation(workingdir, frames, take_name)
+    # finally, we quit !
+    sys.exit()     
+
+quit()

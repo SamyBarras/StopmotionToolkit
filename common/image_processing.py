@@ -1,5 +1,6 @@
-import pygame, cv2
+import pygame, cv2, os
 import numpy as np
+import user_settings
 
 def BGRtoRGB(cv2Image):
     cv2Image[:, :, [0, 2]] = cv2Image[:, :, [2, 0]]
@@ -58,3 +59,16 @@ def rescaleImg(image, mult):
     # resize image
     resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
     return resized
+
+
+def compileAnimation(wdir, frames, name): #channel
+    # global HQFilesDir, workingdir
+    HQFilesDir = os.path.join(wdir,"HQ")
+    command = "ffmpeg -framerate 12 -start_number 0 -i {}/{}_%05d.png -vcodec libx264 -pix_fmt yuv420p {}/{}_animation.mp4".format(HQFilesDir, name, wdir, name)
+    if (len(frames) > 1) :
+        print("Compiling...")
+        #os.system("ffmpeg -framerate 12 -start_number 0 -i " + HQFilesDir + "/" + name + "_%05d.png -vcodec mpeg4 "+wdir+"/"+name+"_animation.mov")
+        os.system(command)
+        print("Animation compiled.")
+    else :
+        print("no files to compile")
