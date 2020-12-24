@@ -1,4 +1,4 @@
-import constants
+import commons.constants
 
 def setup():
     GPIO.setmode(GPIO.BCM)
