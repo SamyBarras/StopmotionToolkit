@@ -198,7 +198,7 @@ if __name__== "__main__":
     else :
         os.putenv('SDL_VIDEODRIVER', 'fbcon')
         # pygame.display.init()
-        # screen = pygame.display.set_mode((1,1))
+        screen = pygame.display.set_mode((1,1))
         
     # loop
     finish = False
