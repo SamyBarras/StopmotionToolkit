@@ -133,28 +133,8 @@ def getMonitor ():
     else :
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
             
-def setupGpio():
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(constants.SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(constants.SHOT_BUTTON, GPIO.FALLING, callback=actionButtn)
-    GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(constants.PLAY_BUTTON, GPIO.FALLING, callback=actionButtn)
-    GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
 
-def ledBlink ():
-    global IS_SHOOTING, IS_PLAYING
-    while True :
-        if IS_SHOOTING is True:
-            print("is shooting")
-            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
-            time.sleep(0.2)
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            time.sleep(0.2)
-        elif IS_PLAYING is True :
-            print("is playing")
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-        else :
-            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+
 
 def displayAnimation():
     global IS_PLAYING
@@ -207,9 +187,9 @@ if __name__== "__main__":
     frames = collections.deque(maxlen=maxFramesBuffer)
     # GPIO initialisation
     if ostype == 0 :
-        import RPi.GPIO as GPIO
-        setupGpio()
-        leds = Thread(target=ledBlink, daemon=True)
+        import common.gpio as gpio
+        gpio.setupGpio()
+        leds = Thread(target=gpio.ledBlink, daemon=True)
         leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
