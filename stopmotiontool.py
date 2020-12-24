@@ -176,6 +176,8 @@ if __name__== "__main__":
     workingdir = setupDir()             # path of working dir
     outputDisplay, w, h = getMonitor () # boolean, width, height
     # pygame
+    if outputDisplay is False:
+        os.environ["SDL_VIDEODRIVER"] = "dummy"
     pygame.init()
     pygame.font.init()
     myfont = pygame.font.SysFont('Helvetica', 15)
@@ -196,8 +198,6 @@ if __name__== "__main__":
     if outputDisplay is True:
         screen = pygame.display.set_mode((1280,720), pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
     else :
-        os.putenv('SDL_VIDEODRIVER', 'fbcon')
-        # pygame.display.init()
         print("no display found")
         screen = pygame.display.set_mode((1,1))
         
