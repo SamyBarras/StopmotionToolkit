@@ -14,7 +14,7 @@ from common.constants import *
 from common.user_settings import *
 from common.cam import *
 import common.image_processing as mod
-import gpio
+import common.gpio as gpio
 
 
 def detectOS ():
@@ -189,7 +189,7 @@ if __name__== "__main__":
     frames = collections.deque(maxlen=maxFramesBuffer)
     # GPIO initialisation
     if ostype == 0 :
-        setupGpio()
+        gpio.setup()
         leds = Thread(target=ledBlink, daemon=True)
         leds.start()
     # camera initialisation

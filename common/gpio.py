@@ -1,6 +1,6 @@
 import constants
 
-def setupGpio():
+def setup():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(SHOT_BUTTON, GPIO.FALLING, callback=actionButtn)
