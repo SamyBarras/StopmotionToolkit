@@ -1,6 +1,5 @@
 import pygame, cv2, os
 import numpy as np
-import user_settings
 
 def BGRtoRGB(cv2Image):
     cv2Image[:, :, [0, 2]] = cv2Image[:, :, [2, 0]]

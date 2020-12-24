@@ -156,7 +156,7 @@ def actionButtn(inputbttn):
         return # not needed, just for clarity
 
 
-def blinkLed ():
+def ledBlink ():
     global IS_SHOOTING, IS_PLAYING
     while True :
         if IS_SHOOTING is True:
