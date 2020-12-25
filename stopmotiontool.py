@@ -187,9 +187,9 @@ if __name__== "__main__":
     frames = collections.deque(maxlen=maxFramesBuffer)
     # GPIO initialisation
     if ostype == 0 :
-        import common.gpio as gpio
-        gpio.setupGpio()
-        leds = Thread(target=gpio.ledBlink, daemon=True)
+        import common.inputs as inputs
+        inputs.setupGpio()
+        leds = Thread(target=inputs.ledBlink, daemon=True)
         leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
