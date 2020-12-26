@@ -1,5 +1,6 @@
 import common.constants as constants
-import RPi as GPIO
+import RPi.GPIO as GPIO
+
 
 def setupGpio():
     GPIO.setmode(GPIO.BCM)
@@ -42,3 +43,5 @@ def ledBlink ():
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+
+
