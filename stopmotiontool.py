@@ -126,16 +126,13 @@ def getMonitor ():
             found = True
             break
         if not found:
-            raise Exception('No suitable video driver found.')
+            #raise Exception('No suitable video driver found.')
             return False, 0, 0
         else :
             return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
             
-
-
-
 def displayAnimation():
     global IS_PLAYING
     while IS_PLAYING :
@@ -170,6 +167,7 @@ def displayCameraStream(buffer):
         screen.blit(fpsconsole, (25,60))
     
     pygame.display.flip()
+
 
 if __name__== "__main__":
     global IS_SHOOTING, IS_PLAYING, frames
@@ -206,7 +204,8 @@ if __name__== "__main__":
         pygame.display.set_caption('stopmotion project')
     else :
         print("==> stopmotion tool run in headless mode !")
-            
+
+
     # main loop
     finish = False
     IS_PLAYING = False
