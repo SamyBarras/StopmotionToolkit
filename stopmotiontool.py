@@ -360,7 +360,6 @@ def quit ():
     myCamera.release()
     pygame.quit()
     if ostype == 0 :
-        leds.join()
         GPIO.cleanup()
     # export animation before quitting totally
     image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
