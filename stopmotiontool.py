@@ -248,7 +248,8 @@ if __name__== "__main__":
     # GPIO initialisation
     if ostype == 0 :
         import common.inputs as inputs
-        inputs.setupGpio()
+        #inputs.setupGpio()
+        setupGpio()
         leds = Thread(target=ledBlink, daemon=True)
         leds.start()
     # camera initialisation
