@@ -13,8 +13,6 @@ import pickle
 # custom imports
 from common import *
 
-print(constants.PLAY_BUTTON)
-
 
 def detectOS ():
     ostype = None
