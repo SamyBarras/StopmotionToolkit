@@ -190,6 +190,7 @@ def capture() :
     IS_SHOOTING = True
 
     if outputdisplay is True :
+        print(screen.get_size())
         myCamera.capturedisp(screen, workingdir, user_settings.take_name)
     else :
         myCamera.capture(workingdir, user_settings.take_name)
@@ -281,13 +282,13 @@ if __name__== "__main__":
 
     # not in headless mode
     if outputdisplay is True:
-        screen = pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE ) #pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode((w/2,h/2), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE ) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
         textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
-        print("==> output display : ", outputdisplay, w, h)
+        print("==> output display resolution : ", w, h)
     else :
         print("==> stopmotion tool run in headless mode !")
 
