@@ -191,6 +191,45 @@ def capture() :
     frames.append(myCamera.lastframe)
     IS_SHOOTING = False
 
+# GPIO FUNCTIONS
+def setupGpio():
+    GPIO.setmode(GPIO.BCM)
+    # play button
+    GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(constants.PLAY_BUTTON, GPIO.FALLING)
+    GPIO.add_event_callback(constants.PLAY_BUTTON, actionButtn,"play")
+    # shot button
+    GPIO.setup(constants.SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(constants.SHOT_BUTTON, GPIO.FALLING)
+    GPIO.add_event_callback(constants.SHOT_BUTTON,actionButtn,"take")
+    # led
+    GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
+    print("==== setup GPIO =====")
+
+def actionButtn(inputbttn,i):
+    '''
+    function called each time a button is pressed
+    will define to shot a frame / play anim / or get out of waiting screen
+    --> need to recode this to allow combined buttons
+    '''
+    if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
+        if GPIO.input(constants.PLAY_BUTTON) == 0 :
+            print("two buttons pressed together !")
+            return 0
+        else :
+            print(i)
+            capture()
+            return 1 #capture()
+    elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
+        if GPIO.input(constants.SHOT_BUTTON) == 0 :
+            print("two buttons pressed together !")
+            return 0
+        else :
+            print(i)
+            #displayAnimation()
+            return 2
+    else :
+        return None # not needed, just for clarity
 
 if __name__== "__main__":
     global IS_SHOOTING, IS_PLAYING, frames, myCamera
