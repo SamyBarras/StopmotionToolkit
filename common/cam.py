@@ -50,7 +50,7 @@ class cam(object):
             if self.stopped :
                 return
     
-    def capture(self, display, target, name): # with output display
+    def capturedisp(self, display, target, name): # with output display
         tmp_frame = self.read()
         fname = "{}_{}.png".format(name, str(self.frameCount).zfill(5))
         filename = os.path.join(target,"HQ",fname)
@@ -69,7 +69,7 @@ class cam(object):
         filename = os.path.join(target,fname)
         cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
         print("{} written!".format(filename))
-        self.lastframe = tmp_frame
+        self.lastframe = cv2ImageToSurface(tmp_frame)
         self.frameCount += 1
         
     

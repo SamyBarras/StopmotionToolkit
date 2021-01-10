@@ -188,11 +188,15 @@ def ledBlink ():
 def capture() :
     global IS_SHOOTING, frames, myCamera
     IS_SHOOTING = True
-    if outputdisplay == True :
-        myCamera.capture(screen, workingdir, user_settings.take_name)
+    print("output?",outputdisplay)
+    if outputdisplay is True :
+        myCamera.capturedisp(screen, workingdir, user_settings.take_name)
     else :
         myCamera.capture(workingdir, user_settings.take_name)
-    frames.append(myCamera.lastframe)
+    if myCamera.lastframe is not None :
+        frames.append(myCamera.lastframe)
+    else :
+        print("error while shooting : last frame is empty !")
     IS_SHOOTING = False
 
 # GPIO FUNCTIONS
