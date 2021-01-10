@@ -282,7 +282,7 @@ if __name__== "__main__":
 
     # not in headless mode
     if outputdisplay is True:
-        screen = pygame.display.set_mode((w/2,h/2), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE ) #pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode((640,480), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE ) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
