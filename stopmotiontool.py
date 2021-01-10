@@ -202,6 +202,7 @@ def capture() :
 
 # GPIO FUNCTIONS
 def setupGpio():
+    print("==== setup GPIO =====")
     GPIO.setmode(GPIO.BCM)
     # play button
     GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -213,7 +214,7 @@ def setupGpio():
     GPIO.add_event_callback(constants.SHOT_BUTTON,actionButtn)
     # led
     GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
-    print("==== setup GPIO =====")
+    print("==> GPIO pins are ready ! ")
 
 def actionButtn(inputbttn):
     global IS_PLAYING, IS_SHOOTING
@@ -276,7 +277,7 @@ if __name__== "__main__":
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded
-    print(myCamera)
+    #print(myCamera)
 
     # not in headless mode
     if outputdisplay is True:
@@ -286,6 +287,7 @@ if __name__== "__main__":
         myfont = pygame.font.SysFont('Helvetica', 15)
         textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
+        print("==> output display : ", outputdisplay, w, h)
     else :
         print("==> stopmotion tool run in headless mode !")
 
