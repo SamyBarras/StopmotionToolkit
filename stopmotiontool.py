@@ -197,16 +197,16 @@ def setupGpio():
     # play button
     GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(constants.PLAY_BUTTON, GPIO.FALLING)
-    GPIO.add_event_callback(constants.PLAY_BUTTON, actionButtn,"play")
+    GPIO.add_event_callback(constants.PLAY_BUTTON, actionButtn)
     # shot button
     GPIO.setup(constants.SHOT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(constants.SHOT_BUTTON, GPIO.FALLING)
-    GPIO.add_event_callback(constants.SHOT_BUTTON,actionButtn,"take")
+    GPIO.add_event_callback(constants.SHOT_BUTTON,actionButtn)
     # led
     GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
     print("==== setup GPIO =====")
 
-def actionButtn(inputbttn,i):
+def actionButtn(inputbttn):
     '''
     function called each time a button is pressed
     will define to shot a frame / play anim / or get out of waiting screen
@@ -217,16 +217,16 @@ def actionButtn(inputbttn,i):
             print("two buttons pressed together !")
             return 0
         else :
-            print(i)
+            print("capture")
             capture()
-            return 1 #capture()
+            return 1
     elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
         if GPIO.input(constants.SHOT_BUTTON) == 0 :
             print("two buttons pressed together !")
             return 0
         else :
-            print(i)
-            #displayAnimation()
+            print("play anim")
+            displayAnimation()
             return 2
     else :
         return None # not needed, just for clarity
