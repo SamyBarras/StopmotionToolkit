@@ -69,7 +69,7 @@ class cam(object):
         filename = os.path.join(target,fname)
         cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
         print("{} written!".format(filename))
-        self.lastframe = cv2ImageToSurface(tmp_frame)
+        self.lastframe = image_processing.cv2ImageToSurface(tmp_frame)
         self.frameCount += 1
         
     
