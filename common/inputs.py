@@ -9,6 +9,7 @@ def setupGpio():
     GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(constants.PLAY_BUTTON, GPIO.FALLING, callback=actionButtn)
     GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
+    print("==== setup GPIO =====")
 
 def actionButtn(inputbttn):
     '''
@@ -16,6 +17,7 @@ def actionButtn(inputbttn):
     will define to shot a frame / play anim / or get out of waiting screen
     --> need to recode this to allow combined buttons
     '''
+    print("gpio action")
     if inputbttn == constant.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
         if GPIO.input(constant.PLAY_BUTTON) == 0 :
             print("two buttons pressed together !")
