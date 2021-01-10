@@ -9,6 +9,7 @@ import cv2
 import psutil
 import numpy as np
 from threading import Thread, Timer
+import pickle
 # custom imports
 from common import *
 
@@ -168,9 +169,31 @@ def displayCameraStream(buffer):
     
     pygame.display.flip()
 
+def ledBlink ():
+    global IS_SHOOTING, IS_PLAYING
+    while True :
+        if IS_SHOOTING is True:
+            print("is shooting")
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+            time.sleep(0.2)
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            time.sleep(0.2)
+        elif IS_PLAYING is True :
+            print("is playing")
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+        else :
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+
+def capture() :
+    global IS_SHOOTING, frames, myCamera
+    IS_SHOOTING = True
+    myCamera.capture(screen, workingdir, user_settings.take_name)
+    frames.append(myCamera.lastframe)
+    IS_SHOOTING = False
+
 
 if __name__== "__main__":
-    global IS_SHOOTING, IS_PLAYING, frames
+    global IS_SHOOTING, IS_PLAYING, frames, myCamera
     # pygame
     pygame.init()
     clock = pygame.time.Clock()
@@ -178,7 +201,7 @@ if __name__== "__main__":
     # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
     workingdir = setupDir()             # path of working dir
-    outputDisplay, w, h = getMonitor () # boolean, width, height
+    outputdisplay, w, h = getMonitor () # boolean, width, height
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
@@ -193,10 +216,11 @@ if __name__== "__main__":
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded
+    print(myCamera)
 
     # not in headless mode
-    if outputDisplay is True:
-        screen = pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.FULLSCREEN) #pygame.RESIZABLE pygame.FULLSCREEN
+    if outputdisplay is True:
+        screen = pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE ) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
@@ -205,7 +229,7 @@ if __name__== "__main__":
     else :
         print("==> stopmotion tool run in headless mode !")
 
-
+        
     # main loop
     finish = False
     IS_PLAYING = False
@@ -213,12 +237,10 @@ if __name__== "__main__":
         # function which do not need output display
         clock.tick(50)
         frameBuffer = myCamera.read()
-        # to place here : gpio functions
-        if ostype == 0 :
-            print("GPIO functions here")
         # then function needed only if output display is available (we have a screen)
-        if outputDisplay is True :
+        if outputdisplay is True :
             fpsconsole = myfont.render(str(clock.get_fps()), False, (250, 0, 0))
+            # switch between animation preview and onion skin view
             if IS_PLAYING is True :
                 displayAnimation()
             else :
@@ -230,10 +252,7 @@ if __name__== "__main__":
                     finish = True
                 if event.type == KEYDOWN :
                     if event.key == K_t :
-                        IS_SHOOTING = True
-                        myCamera.capture(screen, workingdir, user_settings.take_name)
-                        frames.append(myCamera.lastframe)
-                        IS_SHOOTING = False
+                        capture()
                     if event.key == K_p :
                         IS_PLAYING = True
                     if event.key == K_q or event.key == K_ESCAPE:

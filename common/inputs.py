@@ -20,17 +20,18 @@ def actionButtn(inputbttn):
         if GPIO.input(constant.PLAY_BUTTON) == 0 :
             print("two buttons pressed together !")
         else :
-            myCamera.captureFrame()
+            print("capture frame")
+            capture()
     elif inputbttn == constant.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
         if GPIO.input(constant.SHOT_BUTTON) == 0 :
             print("two buttons pressed together !")
         else :
-            playBufferAnimation()
+            print("show animation")
+            displayAnimation()
     else :
         return # not needed, just for clarity
 
 def ledBlink ():
-    global IS_SHOOTING, IS_PLAYING
     while True :
         if IS_SHOOTING is True:
             print("is shooting")

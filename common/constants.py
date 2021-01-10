@@ -1,7 +1,7 @@
 # GPIO Inputs (BCM) & OUTPUTS
-SHOT_BUTTON = 21
-PLAY_BUTTON = 18
-OUTPUT_LED = 25
+PLAY_BUTTON = 16
+SHOT_BUTTON = 20
+OUTPUT_LED = 21
 # OS specific variables
 # [rpi,osx,windows]
 drives = ["/media/pi","/Volumes",""]

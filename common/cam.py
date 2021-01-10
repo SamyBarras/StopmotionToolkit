@@ -15,13 +15,13 @@ import common.user_settings as user_settings
 import common.image_processing as image_processing
 
 class cam(object):
-    global ostype
+    #global ostype
     def __init__(self, arr, os, codec, buffer=4):
         self.id = arr[0]
         self.lastframe = None
         self.surface = None
         self.frameCount = 0
-        self.buffer = buffer
+        self.buffer = buffer # how many frames we store for buffering / default is 4
         self.stream = streamConstructor (self.id, os, codec)
         if not self.stream.isOpened():
             raise ValueError("Unable to open video source", self.id)
@@ -85,8 +85,4 @@ def streamConstructor (id, os=0, codec='MJPG', w=1920, h=1080, fps=30):
         cap = cv2.VideoCapture(id)
     return cap
 
-def streamConstrutor (id):
-    cap = cv2.VideoCapture(id)
-    cap.read()
-    return cap
 
