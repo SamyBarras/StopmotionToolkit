@@ -87,7 +87,7 @@ def getCameraDevice():
             quit()
     else :
         id = -1
-        r = (0, 4)
+        r = (0, 2)
         for i in range(r[0], r[1]):
             tmp = None
             try :
@@ -168,8 +168,6 @@ def defineDisplaySize(camsize, screen_w, screen_h) :
             return (int(screen_w), int(screen_h))
         else :
             return (cam_w, cam_h)
-
-
 
 def displayAnimation():
     global IS_PLAYING
@@ -319,6 +317,7 @@ if __name__== "__main__":
     # not in headless mode
     SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
     if outputdisplay is True:
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10,10)
         screen = pygame.display.set_mode(SCREEN_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
         pygame.font.init()
@@ -359,10 +358,10 @@ if __name__== "__main__":
 
 
 def quit ():
-    leds.join()
     myCamera.release()
     pygame.quit()
     if ostype == 0 :
+        leds.join()
         GPIO.cleanup()
     # export animation before quitting totally
     image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
