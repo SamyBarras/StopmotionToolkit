@@ -33,19 +33,5 @@ def actionButtn(inputbttn):
     else :
         return # not needed, just for clarity
 
-def ledBlink ():
-    global IS_SHOOTING, IS_PLAYING
-    while True :
-        if IS_SHOOTING is True:
-            print("is shooting")
-            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
-            time.sleep(0.2)
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            time.sleep(0.2)
-        elif IS_PLAYING is True :
-            print("is playing")
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-        else :
-            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
 
 

@@ -211,7 +211,7 @@ if __name__== "__main__":
     if ostype == 0 :
         import common.inputs as inputs
         inputs.setupGpio()
-        leds = Thread(target=inputs.ledBlink, daemon=True)
+        leds = Thread(target=ledBlink, daemon=True)
         leds.start()
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
