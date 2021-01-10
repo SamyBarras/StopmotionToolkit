@@ -248,6 +248,7 @@ if __name__== "__main__":
     # GPIO initialisation
     if ostype == 0 :
         import common.inputs as inputs
+        import RPi.GPIO as GPIO
         #inputs.setupGpio()
         setupGpio()
         leds = Thread(target=ledBlink, daemon=True)
