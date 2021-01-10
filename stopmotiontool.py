@@ -47,7 +47,7 @@ def setupDir():
             drivesize = psize
             found = True
     if found is False :
-        print("Working directory will be saved in /Desktop")
+        print("External drive not found.\nWorking directory will be saved in /Desktop")
         if ostype == 2 :
             # windows
             drivepath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
@@ -64,11 +64,11 @@ def setupDir():
         os.makedirs(HQFilesDir)
 
     if os.path.exists(workingdir) and os.path.exists(HQFilesDir):
-        print(workingdir)
+        print("==> Working directory : ", workingdir)
         return workingdir
     else :
         # throw error --> can't setup working dir
-        print("error while creating working dir")
+        print("==> error while creating working dir")
         quit()
 
 def getCameraDevice():
@@ -83,29 +83,30 @@ def getCameraDevice():
             cap.release()
             return arr
         else :
-            print("no camera found !")
+            print("==> Camera not found !")
             quit()
     else :
         id = -1
         r = (0, 4)
-        for i in range(r[0], r[1]):
-            tmp = None
-            cap = cam.streamConstructor (i, ostype)
-            if cap.read()[0]:
-                tmp_w = cap.get(3)
-                tmp_h = cap.get(4)
-                cap.release()
-                tmp_cam = [i,tmp_w, tmp_h]
-                print(i , tmp_w, tmp_h)
-                if tmp_w > res_w :
-                    res_w = tmp_w
-                    arr = tmp_cam
-                id = i
-                
-        if id == -1 :
-            # throw error here --> no camera found
-            print("no camera found !")
-            quit()
+        while id == -1 : # here we do not look for extra cameras, it stops as soon as a camera is found
+            for i in range(r[0], r[1]):
+                tmp = None
+                cap = cam.streamConstructor (i, ostype)
+                if cap.read()[0]:
+                    tmp_w = cap.get(3)
+                    tmp_h = cap.get(4)
+                    cap.release()
+                    tmp_cam = [i,tmp_w, tmp_h]
+                    print(i , tmp_w, tmp_h)
+                    if tmp_w > res_w :
+                        res_w = tmp_w
+                        arr = tmp_cam
+                    id = i
+
+            if id == -1 :
+                # throw error here --> no camera found
+                print("==> Camera not found !")
+                quit()
         return arr
 
 
@@ -191,9 +192,10 @@ def capture() :
 
     if outputdisplay is True :
         print(screen.get_size())
-        myCamera.capturedisp(screen, workingdir, user_settings.take_name)
+        myCamera.capturedisp(SCREEN_SIZE, workingdir, user_settings.take_name)
     else :
         myCamera.capture(workingdir, user_settings.take_name)
+    #
     if myCamera.lastframe is not None :
         frames.append(myCamera.lastframe)
     else :
@@ -247,7 +249,6 @@ def actionButtn(inputbttn):
         return None # not needed, just for clarity
 
 if __name__== "__main__":
-    #global IS_SHOOTING, IS_PLAYING, frames, myCamera, screen, workingdir
     # global var setup
     frames = None # framebuffer for animation
     IS_PLAYING = False
@@ -262,6 +263,7 @@ if __name__== "__main__":
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
     workingdir = setupDir()             # path of working dir
     outputdisplay, w, h = getMonitor () # boolean, width, height
+    SCREEN_SIZE = (w/2, h/2)
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
@@ -279,16 +281,18 @@ if __name__== "__main__":
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded
     #print(myCamera)
+    SCREEN_SIZE = myCamera.size
 
     # not in headless mode
     if outputdisplay is True:
-        screen = pygame.display.set_mode((640,480), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE ) #pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
         textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
         print("==> output display resolution : ", w, h)
+        print("==> window size : ", SCREEN_SIZE)
     else :
         print("==> stopmotion tool run in headless mode !")
 
