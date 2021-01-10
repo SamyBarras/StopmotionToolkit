@@ -24,7 +24,8 @@ def cv2ImageToSurface(cv2Image):
 def rescaleToDisplay(img, display):
     global screen
     ix,iy = (img.shape[1],img.shape[0])
-    bx, by = display
+    bx = display[0]
+    by = display[1]
     if ix > iy:
         # fit to width
         scale_factor = bx/float(ix)
@@ -71,3 +72,5 @@ def compileAnimation(wdir, frames, name): #channel
         print("Animation compiled.")
     else :
         print("no files to compile")
+
+

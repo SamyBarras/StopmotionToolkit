@@ -87,26 +87,33 @@ def getCameraDevice():
             quit()
     else :
         id = -1
-        r = (0, 4)
-        while id == -1 : # here we do not look for extra cameras, it stops as soon as a camera is found
-            for i in range(r[0], r[1]):
-                tmp = None
-                cap = cam.streamConstructor (i, ostype)
-                if cap.read()[0]:
-                    tmp_w = cap.get(3)
-                    tmp_h = cap.get(4)
+        r = (0, 2)
+        
+        for i in range(r[0], r[1]):
+            tmp = None
+            cap = cam.streamConstructor (i, ostype)
+            if cap.read()[0]:
+                tmp_w = cap.get(3)
+                tmp_h = cap.get(4)
+                try :
                     cap.release()
+                except (RuntimeError, TypeError, NameError, ValueError):
+                    break
+                else :
                     tmp_cam = [i,tmp_w, tmp_h]
-                    print("cam id : ", i , " / cam resolution : ", tmp_w, tmp_h)
+                    print(i, tmp_w, tmp_h)
                     if tmp_w > res_w :
                         res_w = tmp_w
                         arr = tmp_cam
                     id = i
 
-            if id == -1 :
-                # throw error here --> no camera found
-                print("==> Camera not found !")
-                quit()
+        if id == -1 :
+            # throw error here --> no camera found
+            print("==> Camera not found !")
+            quit()
+        else :
+            print("==> Camera id : ", arr[0] , " / Resolution : ", arr[1], arr[2])
+
         return arr
 
 
@@ -119,22 +126,52 @@ def getMonitor ():
         for driver in drivers:
             print("Trying \'" + driver + "\'")
             if not os.getenv('SDL_VIDEODRIVER'):
-                os.putenv('SDL_VIDEODRIVER',driver)
+                os.putenv('SDL_VIDEODRIVER', driver)
             try:
                 pygame.display.init()
             except pygame.error:
                 print('failed')
                 continue
-            found = True
-            break
+            else :
+                found = True
+                break
         if not found:
             #raise Exception('No suitable video driver found.')
             return False, 0, 0
         else :
+            print("==> ", pygame.display.Info().current_w, pygame.display.Info().current_h)
             return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
+        print("==> ", pygame.display.Info().current_w, pygame.display.Info().current_h)
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
-            
+
+
+def defineDisplaySize(camsize, screen_w, screen_h) :
+    cam_w = camsize[0]
+    cam_h = camsize[1]
+    if ostype == 0 : # rpi
+        if cam_w > 640 :
+            if screen_w/2 > cam_w :
+                if cam_w > 800/600 :
+                    return (cam_w, cam_h)
+                else :
+                    return (int(cam_w/2), int(cam_h/2))
+            else :
+                if screen_w/2 < 640 :
+                    return (cam_w, cam_h)
+                else :
+                    return (int(screen_w/2), int(screen_h/2))
+        else :
+            return (cam_w, cam_h)
+    else :
+        # not rpi, no speed issue
+        if cam_w > screen_w :
+            return (int(screen_w), int(screen_h))
+        else :
+            return (cam_w, cam_h)
+
+
+
 def displayAnimation():
     global IS_PLAYING
     if outputdisplay is True :
@@ -148,7 +185,7 @@ def displayAnimation():
 def displayCameraStream(buffer):
     # display video stream
     if buffer is not None :
-        screen.blit(image_processing.rescaleToDisplay(buffer, screen), (0, 0))
+        screen.blit(image_processing.rescaleToDisplay(buffer, SCREEN_SIZE), (0, 0))
 
     # display onion skin
     if user_settings.ONIONSKIN >= 1 :
@@ -191,7 +228,6 @@ def capture() :
     IS_SHOOTING = True
 
     if outputdisplay is True :
-        print(screen.get_size())
         myCamera.capturedisp(SCREEN_SIZE, workingdir, user_settings.take_name)
     else :
         myCamera.capture(workingdir, user_settings.take_name)
@@ -262,8 +298,6 @@ if __name__== "__main__":
     # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
     workingdir = setupDir()             # path of working dir
-    outputdisplay, w, h = getMonitor () # boolean, width, height
-    SCREEN_SIZE = (w/2, h/2)
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
@@ -280,10 +314,11 @@ if __name__== "__main__":
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded
-    #print(myCamera)
-    SCREEN_SIZE = myCamera.size
-
+    # detect output display
+    outputdisplay, w, h = getMonitor () # boolean, width, height
+    #SCREEN_SIZE = (int(w/2), int(h/2))
     # not in headless mode
+    SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
     if outputdisplay is True:
         screen = pygame.display.set_mode(SCREEN_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
@@ -291,11 +326,9 @@ if __name__== "__main__":
         myfont = pygame.font.SysFont('Helvetica', 15)
         textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
-        print("==> output display resolution : ", w, h)
         print("==> window size : ", SCREEN_SIZE)
     else :
         print("==> stopmotion tool run in headless mode !")
-
         
     # main loop
     finish = False
