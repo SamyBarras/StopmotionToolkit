@@ -185,9 +185,12 @@ def ledBlink ():
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
 
 def capture() :
-    global IS_SHOOTING, frames, myCamera, screen, workingdir
+    global IS_SHOOTING, frames, myCamera
     IS_SHOOTING = True
-    myCamera.capture(screen, workingdir, user_settings.take_name)
+    if outputdisplay == True :
+        myCamera.capture(screen, workingdir, user_settings.take_name)
+    else :
+        myCamera.capture(workingdir, user_settings.take_name)
     frames.append(myCamera.lastframe)
     IS_SHOOTING = False
 
@@ -232,12 +235,13 @@ def actionButtn(inputbttn):
         return None # not needed, just for clarity
 
 if __name__== "__main__":
-    global IS_SHOOTING, IS_PLAYING, frames, myCamera, screen, workingdir
+    #global IS_SHOOTING, IS_PLAYING, frames, myCamera, screen, workingdir
     # global var setup
     frames = None # framebuffer for animation
     IS_PLAYING = False
     IS_SHOOTING = False
     SCREEN_SIZE = (0,0)
+    screen = None
     # pygame
     pygame.init()
     clock = pygame.time.Clock()

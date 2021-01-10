@@ -28,14 +28,12 @@ class cam(object):
         self.size = (int(self.stream.get(3)),int(self.stream.get(4)))
         self.Q = collections.deque(maxlen=buffer)
         self.stopped = False
-        
     
     def start(self):
         t = Thread(target=self.update, args=())
         t.daemon=True
         t.start()
         return self
-
         
     def update(self):
         while True :
@@ -52,7 +50,7 @@ class cam(object):
             if self.stopped :
                 return
     
-    def capture(self, display, target, name):
+    def capture(self, display, target, name): # with output display
         tmp_frame = self.read()
         fname = "{}_{}.png".format(name, str(self.frameCount).zfill(5))
         filename = os.path.join(target,"HQ",fname)
@@ -61,6 +59,17 @@ class cam(object):
         cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
         print("{} written!".format(filename))
         self.lastframe = image_processing.rescaleToDisplay(tmp_frame, display)
+        self.frameCount += 1
+    
+    def capture(self, target, name) : # no output display
+        tmp_frame = self.read()
+        fname = "{}_{}.png".format(name, str(self.frameCount).zfill(5))
+        filename = os.path.join(target,"HQ",fname)
+        cv2.imwrite(filename, tmp_frame)
+        filename = os.path.join(target,fname)
+        cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
+        print("{} written!".format(filename))
+        self.lastframe = tmp_frame
         self.frameCount += 1
         
     
