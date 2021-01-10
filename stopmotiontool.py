@@ -87,19 +87,18 @@ def getCameraDevice():
             quit()
     else :
         id = -1
-        r = (0, 2)
-        
+        r = (0, 4)
         for i in range(r[0], r[1]):
             tmp = None
-            cap = cam.streamConstructor (i, ostype)
-            if cap.read()[0]:
-                tmp_w = cap.get(3)
-                tmp_h = cap.get(4)
-                try :
+            try :
+                cap = cam.streamConstructor (i, ostype)
+            except (RuntimeError, TypeError, NameError, ValueError):
+                break
+            else :    
+                if cap.read()[0]:
+                    tmp_w = cap.get(3)
+                    tmp_h = cap.get(4)
                     cap.release()
-                except (RuntimeError, TypeError, NameError, ValueError):
-                    break
-                else :
                     tmp_cam = [i,tmp_w, tmp_h]
                     print(i, tmp_w, tmp_h)
                     if tmp_w > res_w :
@@ -360,6 +359,7 @@ if __name__== "__main__":
 
 
 def quit ():
+    leds.join()
     myCamera.release()
     pygame.quit()
     if ostype == 0 :
