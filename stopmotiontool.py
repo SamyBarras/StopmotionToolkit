@@ -12,7 +12,6 @@ from threading import Thread, Timer
 import pickle
 # custom imports
 from common import *
-import common.constants as constants
 
 print(constants.PLAY_BUTTON)
 

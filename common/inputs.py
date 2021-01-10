@@ -1,4 +1,4 @@
-#from .constants import *
+import common.constants as constants
 import RPi.GPIO as GPIO
 
 
@@ -18,14 +18,14 @@ def actionButtn(inputbttn):
     --> need to recode this to allow combined buttons
     '''
     print("gpio action")
-    if inputbttn == constant.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
-        if GPIO.input(constant.PLAY_BUTTON) == 0 :
+    if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
+        if GPIO.input(constants.PLAY_BUTTON) == 0 :
             print("two buttons pressed together !")
         else :
             print("capture frame")
             capture()
-    elif inputbttn == constant.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
-        if GPIO.input(constant.SHOT_BUTTON) == 0 :
+    elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
+        if GPIO.input(constants.SHOT_BUTTON) == 0 :
             print("two buttons pressed together !")
         else :
             print("show animation")
