@@ -1,4 +1,4 @@
-import common.constants as constants
+import .constants as constants
 import RPi.GPIO as GPIO
 
 
