@@ -97,7 +97,7 @@ def getCameraDevice():
                     tmp_h = cap.get(4)
                     cap.release()
                     tmp_cam = [i,tmp_w, tmp_h]
-                    print(i , tmp_w, tmp_h)
+                    print("cam id : ", i , " / cam resolution : ", tmp_w, tmp_h)
                     if tmp_w > res_w :
                         res_w = tmp_w
                         arr = tmp_cam
