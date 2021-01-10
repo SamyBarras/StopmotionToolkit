@@ -136,16 +136,17 @@ def getMonitor ():
             
 def displayAnimation():
     global IS_PLAYING
-    while IS_PLAYING :
-        for i in frames : # frames is pygame.surface array            
-            screen.blit(i, (0, 0))
-            pygame.display.flip()
-            time.sleep(1/user_settings.FPS) # to keep framerate
-        IS_PLAYING=False
+    if outputdisplay is True :
+        while IS_PLAYING :
+            for i in frames : # frames is pygame.surface array            
+                screen.blit(i, (0, 0))
+                pygame.display.flip()
+                time.sleep(1/user_settings.FPS) # to keep framerate
+            IS_PLAYING=False
 
 def displayCameraStream(buffer):
     # display video stream
-    if buffer is not None:
+    if buffer is not None :
         screen.blit(image_processing.rescaleToDisplay(buffer, screen), (0, 0))
 
     # display onion skin
@@ -210,6 +211,7 @@ def setupGpio():
     print("==== setup GPIO =====")
 
 def actionButtn(inputbttn):
+    global IS_PLAYING, IS_SHOOTING
     '''
     function called each time a button is pressed
     will define to shot a frame / play anim / or get out of waiting screen
@@ -228,8 +230,11 @@ def actionButtn(inputbttn):
             print("two buttons pressed together !")
             return 0
         else :
-            print("play anim")
-            displayAnimation()
+            if outputdisplay is True :
+                IS_PLAYING = True
+                print("play anim")
+            else :
+                print("no display to sho animation")
             return 2
     else :
         return None # not needed, just for clarity
