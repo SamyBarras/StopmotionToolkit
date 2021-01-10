@@ -185,7 +185,7 @@ def ledBlink ():
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
 
 def capture() :
-    global IS_SHOOTING, frames, myCamera
+    global IS_SHOOTING, frames, myCamera, screen, workingdir
     IS_SHOOTING = True
     myCamera.capture(screen, workingdir, user_settings.take_name)
     frames.append(myCamera.lastframe)
@@ -232,7 +232,7 @@ def actionButtn(inputbttn):
         return None # not needed, just for clarity
 
 if __name__== "__main__":
-    global IS_SHOOTING, IS_PLAYING, frames, myCamera
+    global IS_SHOOTING, IS_PLAYING, frames, myCamera, screen, workingdir
     # global var setup
     frames = None # framebuffer for animation
     IS_PLAYING = False
