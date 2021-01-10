@@ -138,10 +138,10 @@ def getMonitor ():
             #raise Exception('No suitable video driver found.')
             return False, 0, 0
         else :
-            print("==> ", pygame.display.Info().current_w, pygame.display.Info().current_h)
+            print("==> Screen resolution : ", pygame.display.Info().current_w, pygame.display.Info().current_h)
             return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
-        print("==> ", pygame.display.Info().current_w, pygame.display.Info().current_h)
+        print("==> Screen resolution : ", pygame.display.Info().current_w, pygame.display.Info().current_h)
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
 
 
@@ -314,17 +314,19 @@ if __name__== "__main__":
     # not in headless mode
     SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
     if outputdisplay is True:
-        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10,10)
+        print("==> window size : ", SCREEN_SIZE)
+        #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10,10)
         screen = pygame.display.set_mode(SCREEN_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
         textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
-        print("==> window size : ", SCREEN_SIZE)
     else :
         print("==> stopmotion tool run in headless mode !")
-        
+    
+    #
+    print("==== ready to animate :) =====")
     # main loop
     finish = False
     IS_PLAYING = False
