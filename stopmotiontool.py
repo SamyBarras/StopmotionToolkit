@@ -14,6 +14,8 @@ import pickle
 from common import *
 import common.constants as constants
 
+print(constants.PLAY_BUTTON)
+
 
 def detectOS ():
     ostype = None
