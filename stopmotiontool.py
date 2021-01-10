@@ -149,19 +149,16 @@ def defineDisplaySize(camsize, screen_w, screen_h) :
     cam_w = camsize[0]
     cam_h = camsize[1]
     if ostype == 0 : # rpi
-        if cam_w > 640 :
-            if screen_w/2 > cam_w :
-                if cam_w > 800/600 :
-                    return (cam_w, cam_h)
-                else :
-                    return (int(cam_w/2), int(cam_h/2))
+        if cam_w > screen_w :
+            if screen_w > 1024 :
+                return (int(screen_w/2), int(screen_h/2))
             else :
-                if screen_w/2 < 640 :
-                    return (cam_w, cam_h)
-                else :
-                    return (int(screen_w/2), int(screen_h/2))
+                return (screen_w, screen_h)
         else :
-            return (cam_w, cam_h)
+            if cam_w > 1024 :
+                return (int(cam_w/2), int(cam_h/2))
+            else :
+                return (cam_w, cam_h)
     else :
         # not rpi, no speed issue
         if cam_w > screen_w :
