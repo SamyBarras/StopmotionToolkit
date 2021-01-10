@@ -233,6 +233,11 @@ def actionButtn(inputbttn):
 
 if __name__== "__main__":
     global IS_SHOOTING, IS_PLAYING, frames, myCamera
+    # global var setup
+    frames = None # framebuffer for animation
+    IS_PLAYING = False
+    IS_SHOOTING = False
+    SCREEN_SIZE = (0,0)
     # pygame
     pygame.init()
     clock = pygame.time.Clock()

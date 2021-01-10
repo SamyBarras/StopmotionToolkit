@@ -5,8 +5,4 @@ OUTPUT_LED = 21
 # OS specific variables
 # [rpi,osx,windows]
 drives = ["/media/pi","/Volumes",""]
-# other global vars
-frames = None # framebuffer for animation
-IS_PLAYING = False
-IS_SHOOTING = False
-SCREEN_SIZE = (0,0)
+
