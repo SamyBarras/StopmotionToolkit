@@ -66,11 +66,11 @@ def compileAnimation(wdir, frames, name): #channel
     HQFilesDir = os.path.join(wdir,"HQ")
     command = "ffmpeg -framerate 12 -start_number 0 -i {}/{}_%05d.png -vcodec libx264 -pix_fmt yuv420p {}/{}_animation.mp4".format(HQFilesDir, name, wdir, name)
     if (len(frames) > 1) :
-        print("Compiling...")
+        print("Compiling frames as videofile...")
         #os.system("ffmpeg -framerate 12 -start_number 0 -i " + HQFilesDir + "/" + name + "_%05d.png -vcodec mpeg4 "+wdir+"/"+name+"_animation.mov")
         os.system(command)
         print("Animation compiled.")
     else :
-        print("no files to compile")
+        print("No files to compile as videofile.")
 
 
