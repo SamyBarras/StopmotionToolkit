@@ -12,6 +12,7 @@ from threading import Thread, Timer
 import pickle
 # custom imports
 from common import *
+import common.constants as constants
 
 
 def detectOS ():
