@@ -316,6 +316,15 @@ def actionButtn(inputbttn):
     # else :
     #     return None # not needed, just for clarity
 
+def newProject () :
+    # called each time we start a new shot (takes)
+    global frames, workingdir, myCamera
+
+    frames = collections.deque(maxlen=maxFramesBuffer)
+    workingdir = setupDir()             # path of working dir
+    myCamera.lastframe = None
+
+
 if __name__== "__main__":
     # global var setup
     frames = None # framebuffer for animation
@@ -323,17 +332,20 @@ if __name__== "__main__":
     IS_SHOOTING = False
     SCREEN_SIZE = (0,0)
     screen = None
+    workingdir = None
     # pygame
     pygame.init()
     clock = pygame.time.Clock()
     start_time = pygame.time.get_ticks()
     # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
-    workingdir = setupDir()             # path of working dir
+    # workingdir = setupDir()             # path of working dir
+
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
-    frames = collections.deque(maxlen=maxFramesBuffer)
+    #frames = collections.deque(maxlen=maxFramesBuffer)
+
     # GPIO initialisation
     if ostype == 0 :
         import common.inputs as inputs
@@ -364,6 +376,8 @@ if __name__== "__main__":
     else :
         print("==> stopmotion tool run in headless mode !")
     
+    #
+    newProject ()
     #
     print("==== ready to animate :) =====")
     # main loop
@@ -402,8 +416,9 @@ def quit ():
     # export animation before quitting totally
     image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
     # finally, we quit !
-    #sys.exit()  
-    #call("sudo shutdown -h now", shell=True)   
+    #sys.exit()   ## only exit the script 
 
 quit()
-subprocess.call("sudo shutdown -h now", shell=True)
+
+if ostype == 0 :
+    subprocess.call("sudo shutdown -h now", shell=True) # turn off computer !
