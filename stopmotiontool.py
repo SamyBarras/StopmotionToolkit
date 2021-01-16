@@ -405,4 +405,3 @@ def quit ():
     call("sudo shutdown -h now", shell=True)   
 
 quit()
-#call("sudo shutdown -h now", shell=True)
