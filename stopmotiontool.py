@@ -287,7 +287,7 @@ def actionButtn(inputbttn):
             return 2
         elif pressed_time >= constants.PRESSINGTIME :
             print("long press --> shut down")
-            finish
+            finish = True
             return 0
     
     else :
