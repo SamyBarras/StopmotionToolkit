@@ -251,7 +251,7 @@ def setupGpio():
     print("==> GPIO pins are ready ! ")
 
 def actionButtn(inputbttn):
-    global IS_PLAYING, IS_SHOOTING
+    global IS_PLAYING, IS_SHOOTING, finish
     '''
     function called each time a button is pressed
     will define to shot a frame / play anim / or get out of waiting screen
@@ -268,6 +268,7 @@ def actionButtn(inputbttn):
             capture()
             return 1
         elif pressed_time >= constants.PRESSINGTIME :
+            print("long press --> quit app")
             quit()
             return 0
 
@@ -285,7 +286,8 @@ def actionButtn(inputbttn):
                 print("no display to sho animation")
             return 2
         elif pressed_time >= constants.PRESSINGTIME :
-            quit()
+            print("long press --> shut down")
+            finish
             return 0
     
     else :
@@ -392,7 +394,6 @@ if __name__== "__main__":
                     if event.key == K_q or event.key == K_ESCAPE:
                         finish = True
 
-
 def quit ():
     myCamera.release()
     pygame.quit()
@@ -402,6 +403,7 @@ def quit ():
     image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
     # finally, we quit !
     #sys.exit()  
-    call("sudo shutdown -h now", shell=True)   
+    #call("sudo shutdown -h now", shell=True)   
 
 quit()
+call("sudo shutdown -h now", shell=True)
