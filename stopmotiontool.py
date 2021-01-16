@@ -353,7 +353,7 @@ if __name__== "__main__":
         print("==> window size : ", SCREEN_SIZE)
         #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10,10)
         screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE # pygame.RESIZABLE pygame.FULLSCREEN
-        logo_rect = logo.get_rect(center = screen.get_rect().center)
+        #logo_rect = logo.get_rect(center = screen.get_rect().center)
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
