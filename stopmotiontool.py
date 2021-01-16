@@ -178,6 +178,7 @@ def displayAnimation():
 
 def displayCameraStream(buffer):
     # display video stream
+    #print(buffer)
     if buffer is not None :
         screen.blit(image_processing.rescaleToDisplay(buffer, SCREEN_SIZE), (0, 0))
 
@@ -259,18 +260,38 @@ def actionButtn(inputbttn):
     if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0 :
         #start counting pressed time
         pressed_time=time.monotonic()
-        while GPIO.input(inputbttn) == 0: #call: is button still pressed
-            # just to force process wait
-            # may be possible use in this time.sleep(1) but I don't have confidence
+        while GPIO.input(inputbttn) == 0 :
             pass
         pressed_time=time.monotonic()-pressed_time
-        if pressed_time<.5:
-            print("short press")
+        if pressed_time < constants.PRESSINGTIME :
+            print("short press -> capture")
             capture()
             return 1
-        elif pressed_time>=2:
+        elif pressed_time >= constants.PRESSINGTIME :
             quit()
             return 0
+
+    elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
+        #start counting pressed time
+        pressed_time=time.monotonic()
+        while GPIO.input(inputbttn) == 0 :
+            pass
+        pressed_time=time.monotonic()-pressed_time
+        if pressed_time < constants.PRESSINGTIME :
+            if outputdisplay is True :
+                IS_PLAYING = True
+                print("play anim")
+            else :
+                print("no display to sho animation")
+            return 2
+        elif pressed_time >= constants.PRESSINGTIME :
+            quit()
+            return 0
+    
+    else :
+        return None # not needed, just for clarity
+    
+    # alternative ---> detect if both buttons are pressed together
     # if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
     #     if GPIO.input(constants.PLAY_BUTTON) == 0 :
     #         print("two buttons pressed together !")
@@ -331,7 +352,8 @@ if __name__== "__main__":
     if outputdisplay is True:
         print("==> window size : ", SCREEN_SIZE)
         #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10,10)
-        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE) #pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE # pygame.RESIZABLE pygame.FULLSCREEN
+        logo_rect = logo.get_rect(center = screen.get_rect().center)
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
@@ -379,6 +401,8 @@ def quit ():
     # export animation before quitting totally
     image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
     # finally, we quit !
-    sys.exit()     
+    #sys.exit()  
+    call("sudo shutdown -h now", shell=True)   
 
 quit()
+#call("sudo shutdown -h now", shell=True)
