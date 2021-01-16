@@ -256,27 +256,42 @@ def actionButtn(inputbttn):
     will define to shot a frame / play anim / or get out of waiting screen
     --> need to recode this to allow combined buttons
     '''
-    if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
-        if GPIO.input(constants.PLAY_BUTTON) == 0 :
-            print("two buttons pressed together !")
-            return 0
-        else :
-            print("capture")
+    if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0 :
+        #start counting pressed time
+        pressed_time=time.monotonic()
+        while GPIO.input(inputbttn) == 0: #call: is button still pressed
+            # just to force process wait
+            # may be possible use in this time.sleep(1) but I don't have confidence
+            pass
+        pressed_time=time.monotonic()-pressed_time
+        if pressed_time<.5:
+            print("short press")
             capture()
             return 1
-    elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
-        if GPIO.input(constants.SHOT_BUTTON) == 0 :
-            print("two buttons pressed together !")
+        elif pressed_time>=2:
+            quit()
             return 0
-        else :
-            if outputdisplay is True :
-                IS_PLAYING = True
-                print("play anim")
-            else :
-                print("no display to sho animation")
-            return 2
-    else :
-        return None # not needed, just for clarity
+    # if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
+    #     if GPIO.input(constants.PLAY_BUTTON) == 0 :
+    #         print("two buttons pressed together !")
+    #         return 0
+    #     else :
+    #         print("capture")
+    #         capture()
+    #         return 1
+    # elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
+    #     if GPIO.input(constants.SHOT_BUTTON) == 0 :
+    #         print("two buttons pressed together !")
+    #         return 0
+    #     else :
+    #         if outputdisplay is True :
+    #             IS_PLAYING = True
+    #             print("play anim")
+    #         else :
+    #             print("no display to sho animation")
+    #         return 2
+    # else :
+    #     return None # not needed, just for clarity
 
 if __name__== "__main__":
     # global var setup
