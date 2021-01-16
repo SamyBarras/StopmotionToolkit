@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # customs imports
-import sys, os, time, collections, re, datetime
+import sys, os, time, collections, re, datetime, subprocess
 # dependencies
 import pygame
 import pygame.camera
@@ -406,4 +406,4 @@ def quit ():
     #call("sudo shutdown -h now", shell=True)   
 
 quit()
-call("sudo shutdown -h now", shell=True)
+subprocess.call("sudo shutdown -h now", shell=True)
