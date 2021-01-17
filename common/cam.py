@@ -1,6 +1,6 @@
 #  run qv4l to check camera codec to use
 #  https://www.pyimagesearch.com/2017/02/06/faster-video-file-fps-with-cv2-videocapture-and-opencv/
-import sys, os, time, shutil, collections, re, datetime
+import sys, os, time, shutil, collections, re, datetime, logging
 # dependencies
 import pygame
 import pygame.camera
@@ -24,6 +24,7 @@ class cam(object):
         self.buffer = buffer # how many frames we store for buffering / default is 4
         self.stream = streamConstructor (self.id, os, codec)
         if not self.stream.isOpened():
+            logging.error("Unable to open video source %s", self.id)
             raise ValueError("Unable to open video source", self.id)
         self.size = (int(self.stream.get(3)),int(self.stream.get(4)))
         self.Q = collections.deque(maxlen=buffer)
@@ -57,7 +58,8 @@ class cam(object):
         cv2.imwrite(filename, tmp_frame)
         filename = os.path.join(target,fname)
         cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
-        print("{} written!".format(filename))
+        logging.info("Frame \"%s\" saved", fname)
+        logging.debug("\"%s\" written!",filename)
         self.lastframe = image_processing.rescaleToDisplay(tmp_frame, display)
         self.frameCount += 1
     
@@ -68,7 +70,8 @@ class cam(object):
         cv2.imwrite(filename, tmp_frame)
         filename = os.path.join(target,fname)
         cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
-        print("{} written!".format(filename))
+        logging.info("Frame \"%s\" saved", fname)
+        logging.debug("\"%s\" written!",filename)
         self.lastframe = tmp_frame
         self.frameCount += 1
         

@@ -1,4 +1,4 @@
-import pygame, cv2, os
+import pygame, cv2, os, subprocess, logging
 import numpy as np
 
 def BGRtoRGB(cv2Image):
@@ -66,11 +66,15 @@ def compileAnimation(wdir, frames, name): #channel
     HQFilesDir = os.path.join(wdir,"HQ")
     command = "ffmpeg -framerate 12 -start_number 0 -i {}/{}_%05d.png -vcodec libx264 -pix_fmt yuv420p {}/{}_animation.mp4".format(HQFilesDir, name, wdir, name)
     if (len(frames) > 1) :
-        print("Compiling frames as videofile...")
-        #os.system("ffmpeg -framerate 12 -start_number 0 -i " + HQFilesDir + "/" + name + "_%05d.png -vcodec mpeg4 "+wdir+"/"+name+"_animation.mov")
-        os.system(command)
-        print("Animation compiled.")
+        logging.info("Compiling frames as videofile...")
+        subprocess.call(command, shell=True)
+        logging.info("Animation compiled.")
     else :
-        print("No files to compile as videofile.")
+        logging.warning("No files to compile as videofile.")
+
+def centerScreen(screen_res, window_res):
+    x = screen_res[0]/2 - window_res[0]/2
+    y = screen_res[1]/2 - window_res[1]/2
+    return (x, y)
 
 

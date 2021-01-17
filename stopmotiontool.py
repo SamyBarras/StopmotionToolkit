@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # customs imports
-import sys, os, time, collections, re, datetime, subprocess
+import sys, os, time, collections, re, datetime, subprocess, logging
 # dependencies
 import pygame
 import pygame.camera
@@ -13,10 +13,31 @@ import pickle
 # custom imports
 from common import *
 
+# logging 
+class MyFormatter(logging.Formatter):
+    def format(self, record):
+        if record.levelno == logging.INFO:
+            self._style._fmt = "%(message)s"
+        else:
+            color = {
+                logging.WARNING: 33,
+                logging.ERROR: 31,
+                logging.FATAL: 31,
+                logging.DEBUG: 36
+            }.get(record.levelno, 0)
+            self._style._fmt = f"\033[{color}m%(levelname)s\033[0m: %(message)s"
+        return super().format(record)
+
+#logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+handler.setFormatter(MyFormatter())
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 def detectOS ():
     ostype = None
-    print("os : ", os.uname()[1], os.uname()[4])
+    logging.debug("os : %s - %s ", os.uname()[1], os.uname()[4])
     if (os.uname()[4].startswith("arm")) : # rpi
         ostype = 0
     elif (os.uname()[4].startswith("x86_64")) : # osx
@@ -24,18 +45,17 @@ def detectOS ():
     else :
         ostype = 2
         # throw error --> can't run on this machine (OS issue)
-        print("os not recognized -- please play with Rpi or OSX !")
+        logging.critical("OS not recognized -- please play with Rpi or OSX !")
         sys.exit(2)
     return ostype
 
-
-def setupDir():
-    print("==== setup working dir =====")
+def setupDir(_t):
+    logging.info("==== setup working dir =====")
     partitions = psutil.disk_partitions()
     drivesize = 0
     regEx = '\A' + constants.drives[ostype]
     found = False
-    #print(drives[ostype])
+    
     for p in partitions :
         drivepath = p.mountpoint
         psize = psutil.disk_usage(p.mountpoint).free
@@ -47,34 +67,55 @@ def setupDir():
             drivesize = psize
             found = True
     if found is False :
-        print("External drive not found.\nWorking directory will be saved in /Desktop")
+        logging.warning("External drive not found ! Project will be stored in Desktop...")
         if ostype == 2 :
             # windows
             drivepath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
         else :
             # 0 and 1 are OSX and Linux systems
             drivepath = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+
+    if not user_settings.PROJECT_NAME : # project_name custom paramater is not set... we use time to make unik name
+        dirname = datetime.datetime.now().strftime('%Y%m%d') #_%H%M%S')
+    else :
+        # desktop / PROJECT_NAME / take
+        dirname = datetime.datetime.now().strftime('%Y%m%d') + "_" + user_settings.PROJECT_NAME
     
-    workingdir = os.path.join(drivepath, "stopmotion", datetime.datetime.now().strftime('%Y_%m_%d/%H%M%S')+"_" + user_settings.project_name)
-    if not os.path.exists(workingdir):
+    #workingdir = os.path.join(drivepath, "stopmotion", dirname, _t)
+    #datetime.datetime.now().strftime('%Y_%m_%d/%H%M%S')) # use time to name dir
+    # # + "_" + user_settings.project_name)
+    projectdir = os.path.join(drivepath, "stopmotion", dirname)
+    if not os.path.exists(projectdir):
+        takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
+    else :
+        # project already exists -> we create a new take
+        lasttakedir = os.path.basename(max([os.path.join(projectdir, d) for d in os.listdir(projectdir)], key=os.path.getmtime)).split("_")
+        if lasttakedir[0] == user_settings.TAKE_NAME :
+            # same take name (should always be)
+            lasttakenum = int(lasttakedir[-1])
+            _t = lasttakenum+1
+            takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
+    
+    workingdir = os.path.join(projectdir, takeDir)
+    if not os.path.exists(workingdir) :
         os.makedirs(workingdir)
-    
+
     HQFilesDir = os.path.join(workingdir,"HQ")
     if not os.path.exists(HQFilesDir) : 
         os.makedirs(HQFilesDir)
 
     if os.path.exists(workingdir) and os.path.exists(HQFilesDir):
-        print("==> Working directory : ", workingdir)
-        return workingdir
+        logging.info("Working directory : %s", workingdir)
+        return workingdir, _t
     else :
         # throw error --> can't setup working dir
-        print("==> error while creating working dir")
+        logging.error("error while creating working dir")
         quit()
 
 def getCameraDevice():
     res_w = 0
     arr = []
-    print("==== setup camera =====")
+    logging.info("==== setup camera =====")
     if user_settings.forceCamera is True :
         # camera to use is defined by user settings
         cap = cam.streamConstructor (camIndex, ostype, user_settings.camera_codec)
@@ -83,7 +124,7 @@ def getCameraDevice():
             cap.release()
             return arr
         else :
-            print("==> Camera not found !")
+            logging.error("Camera not found !")
             quit()
     else :
         id = -1
@@ -100,7 +141,7 @@ def getCameraDevice():
                     tmp_h = cap.get(4)
                     cap.release()
                     tmp_cam = [i,tmp_w, tmp_h]
-                    print(i, tmp_w, tmp_h)
+                    logging.debug("cam %s -> (%s,%s)",i, tmp_w, tmp_h)
                     if tmp_w > res_w :
                         res_w = tmp_w
                         arr = tmp_cam
@@ -108,28 +149,28 @@ def getCameraDevice():
 
         if id == -1 :
             # throw error here --> no camera found
-            print("==> Camera not found !")
+            logging.error("Camera not found !")
             quit()
         else :
-            print("==> Camera id : ", arr[0] , " / Resolution : ", arr[1], arr[2])
+            logging.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
 
         return arr
 
 
 def getMonitor ():
-    print("==== setup output display =====")
+    logging.info("==== setup output display =====")
     if ostype == 0 :
         #raspberry pi
         drivers = ('directfb', 'fbcon', 'svgalib')
         found = False
         for driver in drivers:
-            print("Trying \'" + driver + "\'")
+            logging.debug("Trying \'%s\'", driver)
             if not os.getenv('SDL_VIDEODRIVER'):
                 os.putenv('SDL_VIDEODRIVER', driver)
             try:
                 pygame.display.init()
             except pygame.error:
-                print('failed')
+                logging.debug('%s -> failed', driver)
                 continue
             else :
                 found = True
@@ -138,10 +179,10 @@ def getMonitor ():
             #raise Exception('No suitable video driver found.')
             return False, 0, 0
         else :
-            print("==> Screen resolution : ", pygame.display.Info().current_w, pygame.display.Info().current_h)
+            logging.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
             return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
-        print("==> Screen resolution : ", pygame.display.Info().current_w, pygame.display.Info().current_h)
+        logging.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
 
 
@@ -207,36 +248,36 @@ def ledBlink ():
     global IS_SHOOTING, IS_PLAYING
     while True :
         if IS_SHOOTING is True:
-            print("is shooting")
+            logging.debug("is shooting")
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
             time.sleep(0.2)
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             time.sleep(0.2)
         elif IS_PLAYING is True :
-            print("is playing")
+            logging.debug("is playing")
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
 
 def capture() :
-    global IS_SHOOTING
+    global IS_SHOOTING, take
     IS_SHOOTING = True
 
     if outputdisplay is True :
-        myCamera.capturedisp(SCREEN_SIZE, workingdir, user_settings.take_name)
+        myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
     else :
-        myCamera.capture(workingdir, user_settings.take_name)
+        myCamera.capture(workingdir, take)
     #
     if myCamera.lastframe is not None :
         frames.append(myCamera.lastframe)
     else :
-        print("error while shooting : last frame is empty !")
+        logging.error("Error while shooting : last frame is empty !")
 
     IS_SHOOTING = False
 
 # GPIO FUNCTIONS
 def setupGpio():
-    print("==== setup GPIO =====")
+    logging.info("==== etup GPIO =====")
     GPIO.setmode(GPIO.BCM)
     # play button
     GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -248,7 +289,7 @@ def setupGpio():
     GPIO.add_event_callback(constants.SHOT_BUTTON,actionButtn)
     # led
     GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
-    print("==> GPIO pins are ready ! ")
+    logging.info("GPIO pins are ready ! ")
 
 def actionButtn(inputbttn):
     global IS_PLAYING, IS_SHOOTING, finish
@@ -264,11 +305,11 @@ def actionButtn(inputbttn):
             pass
         pressed_time=time.monotonic()-pressed_time
         if pressed_time < constants.PRESSINGTIME :
-            print("short press -> capture")
+            logging.debug("short press -> capture")
             capture()
             return 1
         elif pressed_time >= constants.PRESSINGTIME :
-            print("long press --> quit app")
+            logging.debug("long press --> quit app")
             quit()
             return 0
 
@@ -281,12 +322,12 @@ def actionButtn(inputbttn):
         if pressed_time < constants.PRESSINGTIME :
             if outputdisplay is True :
                 IS_PLAYING = True
-                print("play anim")
+                logging.debug("play anim")
             else :
-                print("no display to sho animation")
+                logging.debug("no display to show animation")
             return 2
         elif pressed_time >= constants.PRESSINGTIME :
-            print("long press --> shut down")
+            logging.debug("long press --> shut down")
             finish = True
             return 0
     
@@ -318,11 +359,16 @@ def actionButtn(inputbttn):
 
 def newProject () :
     # called each time we start a new shot (takes)
-    global frames, workingdir, myCamera
-
+    global frames, workingdir, myCamera, takenum, take
+    # setup take and new dir
+    workingdir, takenum = setupDir(takenum) # path of working dir
+    # reset everything
+    take = user_settings.TAKE_NAME + str(takenum).zfill(2)
     frames = collections.deque(maxlen=maxFramesBuffer)
-    workingdir = setupDir()             # path of working dir
     myCamera.lastframe = None
+    myCamera.frameCount = 0
+    # update takenum for next time
+    takenum += 1
 
 
 if __name__== "__main__":
@@ -333,18 +379,18 @@ if __name__== "__main__":
     SCREEN_SIZE = (0,0)
     screen = None
     workingdir = None
+    takenum = 0
+    take = None
     # pygame
     pygame.init()
     clock = pygame.time.Clock()
     start_time = pygame.time.get_ticks()
     # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
-    # workingdir = setupDir()             # path of working dir
 
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
-    #frames = collections.deque(maxlen=maxFramesBuffer)
 
     # GPIO initialisation
     if ostype == 0 :
@@ -364,17 +410,17 @@ if __name__== "__main__":
     # not in headless mode
     SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
     if outputdisplay is True:
-        print("==> window size : ", SCREEN_SIZE)
-        #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10,10)
+        logging.info("Window size : %s", SCREEN_SIZE)
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % image_processing.centerScreen((w, h), SCREEN_SIZE)
         screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE # pygame.RESIZABLE pygame.FULLSCREEN
-        #logo_rect = logo.get_rect(center = screen.get_rect().center)
+        
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
         textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
     else :
-        print("==> stopmotion tool run in headless mode !")
+        logging.warning("Stopmotion tool run in headless mode !")
     
     #
     newProject ()
@@ -405,6 +451,8 @@ if __name__== "__main__":
                         capture()
                     if event.key == K_p :
                         IS_PLAYING = True
+                    if event.key == K_n :
+                        newProject()
                     if event.key == K_q or event.key == K_ESCAPE:
                         finish = True
 
@@ -414,11 +462,12 @@ def quit ():
     if ostype == 0 :
         GPIO.cleanup()
     # export animation before quitting totally
-    image_processing.compileAnimation(workingdir, frames, user_settings.take_name)
+    if user_settings.EXPORT_ANIM is True :
+        image_processing.compileAnimation(workingdir, frames, take)
     # finally, we quit !
-    #sys.exit()   ## only exit the script 
 
 quit()
 
-if ostype == 0 :
+if ostype == 0 and user_settings.shutdown_rpi is True:
+    # turn off RPi at end
     subprocess.call("sudo shutdown -h now", shell=True) # turn off computer !
