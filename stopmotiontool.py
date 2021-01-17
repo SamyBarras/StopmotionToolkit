@@ -250,23 +250,26 @@ def ledBlink ():
     delay = 200 # ms
     change_time = current_time + delay
     show = False
-    while True and GPIO.input(inputbttn) == 1 :
-        if IS_SHOOTING is True:
-            logging.debug("is shooting")
-            current_time = pygame.time.get_ticks()
-            if current_time >= change_time:
-                # time of next change 
-                change_time = current_time + delay
-                show = not show
-                GPIO.output(constants.OUTPUT_LED,show)
-            # time.sleep(0.2)
-            # GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            # time.sleep(0.2)
-        elif IS_PLAYING is True :
-            logging.debug("is playing")
+    while True :
+        if GPIO.input(inputbttn) == 0 :
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
-            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+            if IS_SHOOTING is True:
+                logging.debug("is shooting")
+                current_time = pygame.time.get_ticks()
+                if current_time >= change_time:
+                    # time of next change 
+                    change_time = current_time + delay
+                    show = not show
+                    GPIO.output(constants.OUTPUT_LED,show)
+                # time.sleep(0.2)
+                # GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+                # time.sleep(0.2)
+            elif IS_PLAYING is True :
+                logging.debug("is playing")
+                GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            else :
+                GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
     else :
         GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             
@@ -482,6 +485,7 @@ def quit ():
     if ostype == 0 :
         GPIO.cleanup()
     # export animation before quitting totally
+    print("export anim ?", user_settings.EXPORT_ANIM)
     if user_settings.EXPORT_ANIM is True :
         loggin.info(take)
         image_processing.compileAnimation(workingdir, frames, take)
