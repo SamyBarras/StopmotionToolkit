@@ -483,6 +483,7 @@ def quit ():
         GPIO.cleanup()
     # export animation before quitting totally
     if user_settings.EXPORT_ANIM is True :
+        loggin.info(take)
         image_processing.compileAnimation(workingdir, frames, take)
     # finally, we quit !
 
