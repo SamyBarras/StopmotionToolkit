@@ -30,8 +30,8 @@ class MyFormatter(logging.Formatter):
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 handler = logging.StreamHandler(sys.stdout) # maybe duplicate with FileHandler ?
-logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log')
-handler = logging.FileHandler(filename=logFile, mode='a', encoding='utf-8')
+logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log') # this will create an error if launched on WINDOWS OS
+handler = logging.FileHandler(filename=logFile, mode='w', encoding='utf-8')
 handler.setFormatter(MyFormatter())#MyFormatter()
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
