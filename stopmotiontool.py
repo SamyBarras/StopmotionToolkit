@@ -116,7 +116,7 @@ def setupTakeDir(projectdir, _t):
     else :
         # throw error --> can't setup working dir
         logging.error("error while creating working dir")
-        quit()
+        aquit()
 
 def getCameraDevice():
     res_w = 0
@@ -131,7 +131,7 @@ def getCameraDevice():
             return arr
         else :
             logging.error("Camera not found !")
-            quit()
+            aquit()
     else :
         id = -1
         r = (0, 2)
@@ -156,7 +156,7 @@ def getCameraDevice():
         if id == -1 :
             # throw error here --> no camera found
             logging.error("Camera not found !")
-            quit()
+            aquit()
         else :
             logging.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
 
@@ -251,27 +251,22 @@ def ledBlink ():
     change_time = current_time + delay
     show = False
     while True :
-        if GPIO.input(inputbttn) == 0 :
+        if IS_SHOOTING is True:
+            logging.debug("is shooting")
+            current_time = pygame.time.get_ticks()
+            if current_time >= change_time:
+                # time of next change 
+                change_time = current_time + delay
+                show = not show
+                GPIO.output(constants.OUTPUT_LED,show)
+            # time.sleep(0.2)
+            # GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            # time.sleep(0.2)
+        elif IS_PLAYING is True :
+            logging.debug("is playing")
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
-            if IS_SHOOTING is True:
-                logging.debug("is shooting")
-                current_time = pygame.time.get_ticks()
-                if current_time >= change_time:
-                    # time of next change 
-                    change_time = current_time + delay
-                    show = not show
-                    GPIO.output(constants.OUTPUT_LED,show)
-                # time.sleep(0.2)
-                # GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-                # time.sleep(0.2)
-            elif IS_PLAYING is True :
-                logging.debug("is playing")
-                GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            else :
-                GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
-    else :
-        GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
             
 
 def capture() :
@@ -352,7 +347,7 @@ def actionButtn(inputbttn):
 
 def newTake () :
     # called each time we start a new shot (takes)
-    global frames, workingdir, myCamera, takenum, take
+    global frames, myCamera, takenum, take, workingdir
     # setup take and new dir
     workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
     # reset everything
@@ -362,6 +357,20 @@ def newTake () :
     myCamera.frameCount = 0
     # update takenum for next time
     takenum += 1
+    return workingdir
+
+def aquit():
+    myCamera.release()
+    pygame.quit()
+    if ostype == 0 :
+        GPIO.cleanup()
+    # export animation before quitting totally
+    if user_settings.EXPORT_ANIM is True :
+        logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
+        image_processing.compileAnimation(workingdir, frames, take)
+     
+    sys.exit()
+    # finally, we quit !
 
 
 if __name__== "__main__":
@@ -387,9 +396,7 @@ if __name__== "__main__":
 
     # GPIO initialisation
     if ostype == 0 :
-        #import common.inputs as inputs
         import RPi.GPIO as GPIO
-        #inputs.setupGpio()
         setupGpio()
         leds = Thread(target=ledBlink, daemon=True)
         leds.start()
@@ -403,7 +410,7 @@ if __name__== "__main__":
     projectdir = setupProjectDir()
     workingdir = None
     # ==== new take =====
-    newTake ()
+    workingdir = newTake ()
 
     # ============ output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
@@ -411,10 +418,8 @@ if __name__== "__main__":
     if outputdisplay is True:
         SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
         logging.info("Window size : %s", SCREEN_SIZE)
-        #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % image_processing.centerScreen((w, h), SCREEN_SIZE)
         preview = pygame.Surface(SCREEN_SIZE)
-        screen = pygame.display.set_mode((w,h), pygame.RESIZABLE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
-        #surf_center = image_processing.centerScreen((w, h), SCREEN_SIZE)
+        screen = pygame.display.set_mode((w,h), pygame.FULLSCREEN) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
         surf_center = (
             (w-preview.get_width())/2,
             (h-preview.get_height())/2
@@ -469,30 +474,20 @@ if __name__== "__main__":
                     if event.key == K_t :
                         capture()
                     if event.key == K_p and outputdisplay is True :
-                            IS_PLAYING = True
+                        IS_PLAYING = True
                     if event.key == K_n :
                         newTake()
                     if event.key == K_f and outputdisplay is True :
                         pygame.display.toggle_fullscreen()
                     if event.key == K_q :
-                        quit()
+                        aquit()
+                        sys.exit()
                     if event.key == K_ESCAPE:
+                        aquit()
                         finish = True
 
-def quit ():
-    myCamera.release()
-    pygame.quit()
-    if ostype == 0 :
-        GPIO.cleanup()
-    # export animation before quitting totally
-    print("export anim ?", user_settings.EXPORT_ANIM)
-    if user_settings.EXPORT_ANIM is True :
-        loggin.info(take)
-        image_processing.compileAnimation(workingdir, frames, take)
-    # finally, we quit !
 
-quit()
-
-if ostype == 0 and user_settings.shutdown_rpi is True:
+if ostype == 0 and user_settings.shutdown_rpi :
     # turn off RPi at end
     subprocess.call("sudo shutdown -h now", shell=True) # turn off computer !
+    
