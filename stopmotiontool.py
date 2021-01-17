@@ -13,7 +13,7 @@ import pickle
 # custom imports
 from common import *
 
-# logging 
+# logging     https://stackoverflow.com/questions/14844970/modifying-logging-message-format-based-on-message-logging-level-in-python3
 class MyFormatter(logging.Formatter):
     def format(self, record):
         if record.levelno == logging.INFO:
