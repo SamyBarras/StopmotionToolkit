@@ -239,8 +239,9 @@ def displayCameraStream(buffer):
             f -= 1
     
     if user_settings.show_console is True :
-        screen.blit(textsurface,(25,25))
-        screen.blit(fpsconsole, (25,60))
+        screen.blit(infos_take,(25,25))
+        screen.blit(infos_cam, (25,50))
+        screen.blit(infos_fps, (25,75))
     
     pygame.display.flip()
 
@@ -309,8 +310,8 @@ def actionButtn(inputbttn):
             capture()
             return 1
         elif pressed_time >= constants.PRESSINGTIME :
-            logging.debug("long press --> quit app")
-            quit()
+            logging.debug("long press --> new take")
+            newTake()
             return 0
 
     elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
@@ -357,7 +358,7 @@ def actionButtn(inputbttn):
     # else :
     #     return None # not needed, just for clarity
 
-def newProject () :
+def newTake () :
     # called each time we start a new shot (takes)
     global frames, workingdir, myCamera, takenum, take
     # setup take and new dir
@@ -403,28 +404,31 @@ if __name__== "__main__":
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
-    myCamera.start() # threaded
+    myCamera.start() # threaded    
+    # ==== new project ====
+    # ==== new take =====
+    newTake ()
+    # ============ output last setup
     # detect output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
-    #SCREEN_SIZE = (int(w/2), int(h/2))
     # not in headless mode
-    SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
     if outputdisplay is True:
+        SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
         logging.info("Window size : %s", SCREEN_SIZE)
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % image_processing.centerScreen((w, h), SCREEN_SIZE)
-        screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE # pygame.RESIZABLE pygame.FULLSCREEN
+        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN
         
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
-        textsurface = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
+        infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0))
+        infos_cam = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
+        infos_fps = myfont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0))
         pygame.display.set_caption('stopmotion project')
     else :
         logging.warning("Stopmotion tool run in headless mode !")
     
-    #
-    newProject ()
-    #
+    # ============ ready
     logging.info("==== ready to animate :) =====")
     # main loop
     finish = False
@@ -452,7 +456,7 @@ if __name__== "__main__":
                     if event.key == K_p :
                         IS_PLAYING = True
                     if event.key == K_n :
-                        newProject()
+                        newTake()
                     if event.key == K_q or event.key == K_ESCAPE:
                         finish = True
 
