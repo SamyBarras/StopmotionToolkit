@@ -394,7 +394,7 @@ if __name__== "__main__":
 
     # GPIO initialisation
     if ostype == 0 :
-        import common.inputs as inputs
+        #import common.inputs as inputs
         import RPi.GPIO as GPIO
         #inputs.setupGpio()
         setupGpio()
@@ -425,7 +425,7 @@ if __name__== "__main__":
     #
     newProject ()
     #
-    print("==== ready to animate :) =====")
+    logging.info("==== ready to animate :) =====")
     # main loop
     finish = False
     IS_PLAYING = False
