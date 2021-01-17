@@ -313,6 +313,7 @@ def actionButtn(inputbttn):
         elif pressed_time >= constants.PRESSINGTIME :
             logging.debug("long press --> new take")
             newTake()
+            infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0))
             return 0
 
     elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
@@ -458,6 +459,7 @@ if __name__== "__main__":
                         IS_PLAYING = True
                     if event.key == K_n :
                         newTake()
+                        infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0))
                     if event.key == K_q :
                         quit()
                     if event.key == K_ESCAPE:
