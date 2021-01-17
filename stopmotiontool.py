@@ -312,7 +312,7 @@ def actionButtn(inputbttn):
         #start counting pressed time
         pressed_time=time.monotonic()
         while GPIO.input(inputbttn) == 0 :
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            #GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             pass
         pressed_time=time.monotonic()-pressed_time
         if pressed_time < constants.PRESSINGTIME :
