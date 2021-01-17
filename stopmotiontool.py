@@ -9,7 +9,6 @@ import cv2
 import psutil
 import numpy as np
 from threading import Thread, Timer
-import pickle
 # custom imports
 from common import *
 
@@ -33,7 +32,7 @@ logger = logging.getLogger()
 #handler = logging.StreamHandler()
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(MyFormatter())
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 def detectOS ():
@@ -51,6 +50,9 @@ def detectOS ():
     return ostype
 
 def setupProjectDir():
+    '''
+        This way of checking external drives needs startX to work
+    '''
     logging.info("==== setup working dir =====")
     partitions = psutil.disk_partitions()
     drivesize = 0
@@ -66,6 +68,7 @@ def setupProjectDir():
         if tmp is not None and  psize > drivesize:
             drivepath = p.mountpoint
             drivesize = psize
+            logging.debug("External drive found -> %s -> %s", drivepath, drivesize)
             found = True
     if found is False :
         logging.warning("External drive not found ! Project will be stored in Desktop...")
@@ -116,7 +119,7 @@ def setupTakeDir(projectdir, _t):
     else :
         # throw error --> can't setup working dir
         logging.error("error while creating working dir")
-        aquit()
+        quit()
 
 def getCameraDevice():
     res_w = 0
@@ -131,7 +134,7 @@ def getCameraDevice():
             return arr
         else :
             logging.error("Camera not found !")
-            aquit()
+            quit()
     else :
         id = -1
         r = (0, 2)
@@ -156,7 +159,7 @@ def getCameraDevice():
         if id == -1 :
             # throw error here --> no camera found
             logging.error("Camera not found !")
-            aquit()
+            quit()
         else :
             logging.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
 
@@ -246,27 +249,18 @@ def displayCameraStream(buffer):
 
 def ledBlink ():
     global IS_SHOOTING, IS_PLAYING
-    current_time = pygame.time.get_ticks()
-    delay = 200 # ms
-    change_time = current_time + delay
-    show = False
     while True :
         if IS_SHOOTING is True:
-            logging.debug("is shooting")
-            current_time = pygame.time.get_ticks()
-            if current_time >= change_time:
-                # time of next change 
-                change_time = current_time + delay
-                show = not show
-                GPIO.output(constants.OUTPUT_LED,show)
-            # time.sleep(0.2)
-            # GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            # time.sleep(0.2)
+            time.sleep(0.2)
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            time.sleep(0.2)
         elif IS_PLAYING is True :
-            logging.debug("is playing")
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+    
+    # end of thread, we turn off LED
+    GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             
 
 def capture() :
@@ -312,7 +306,6 @@ def actionButtn(inputbttn):
         #start counting pressed time
         pressed_time=time.monotonic()
         while GPIO.input(inputbttn) == 0 :
-            #GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             pass
         pressed_time=time.monotonic()-pressed_time
         if pressed_time < constants.PRESSINGTIME :
@@ -359,7 +352,7 @@ def newTake () :
     takenum += 1
     return workingdir
 
-def aquit():
+def quit():
     myCamera.release()
     pygame.quit()
     if ostype == 0 :
@@ -383,13 +376,10 @@ if __name__== "__main__":
     workingdir = None
     takenum = 0
     take = None
-    # pygame
+    # initialise pygame
     pygame.init()
-    clock = pygame.time.Clock()
-    start_time = pygame.time.get_ticks()
     # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
-
     # frames buffer for animation preview
     # --> ring buffer # duration in seconds for animation preview (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
@@ -408,7 +398,6 @@ if __name__== "__main__":
 
     # ==== new project ====
     projectdir = setupProjectDir()
-    workingdir = None
     # ==== new take =====
     workingdir = newTake ()
 
@@ -426,10 +415,13 @@ if __name__== "__main__":
         )
         # font and info elements
         pygame.font.init()
-        myfont = pygame.font.SysFont('Helvetica', 15)
+        myfont = pygame.font.SysFont('Futura', 15)
         infos_cam = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
         infos_fps = myfont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
         pygame.display.set_caption('stopmotion project')
+        # hide mouse
+        pygame.mouse.set_visible(False)
+        pygame.mouse.get_rel()
 
     else :
         logging.warning("Stopmotion tool run in headless mode !")
@@ -438,32 +430,14 @@ if __name__== "__main__":
     logging.info("==== ready to animate :) =====")
     # main loop
     finish = False
+    prev_frame_time = time.time()
     while not finish:
         # function which do not need output display
-        clock.tick(50)
+        #clock.tick(50)
         frameBuffer = myCamera.read()
+        new_frame_time = time.time()
         # then function needed only if output display is available (we have a screen)
         if outputdisplay is True :
-            # switch between animation preview and onion skin view
-            if IS_PLAYING is True :
-                displayAnimation()
-            else:
-                displayCameraStream(frameBuffer)
-
-            if user_settings.show_console is True :
-                screen.blit(preview, surf_center) # console on top of preview ?
-                fpsconsole = myfont.render(str("%.2f" % clock.get_fps()), False, (250, 0, 0), (0,0,0))
-                infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0), (0,0,0))
-                screen.blit(infos_take,(25,25))
-                screen.blit(infos_cam, (25,50))
-                screen.blit(infos_fps, (25,75))
-                screen.blit(fpsconsole, (25,90))
-            else :
-                screen.fill((0,0,0))
-                screen.blit(preview, surf_center)
-
-            pygame.display.flip()
-            
             # pygame events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -480,11 +454,41 @@ if __name__== "__main__":
                     if event.key == K_f and outputdisplay is True :
                         pygame.display.toggle_fullscreen()
                     if event.key == K_q :
-                        aquit()
+                        quit()
                         sys.exit()
                     if event.key == K_ESCAPE:
-                        aquit()
+                        quit()
                         finish = True
+
+            # switch between animation preview and onion skin view
+            if IS_PLAYING is True :
+                displayAnimation()
+            else:
+                displayCameraStream(frameBuffer)
+
+            if user_settings.show_console is True :
+                screen.blit(preview, surf_center) # console on top of preview ?
+                # calculate framerate
+                fps = 1/(new_frame_time-prev_frame_time) 
+                fpsconsole = myfont.render(str("%.2f" % fps), False, (250, 0, 0), (0,0,0))
+                infos_take = myfont.render("Take : " + workingdir, False, (250, 0, 0), (0,0,0))
+                screen.blit(infos_take,(25,25))
+                screen.blit(infos_cam, (25,50))
+                screen.blit(infos_fps, (25,75))
+                screen.blit(fpsconsole, (25,90))
+            else :
+                screen.fill((0,0,0))
+                screen.blit(preview, surf_center)
+
+            pygame.display.flip()
+            prev_frame_time = new_frame_time
+            # handle mouse move
+            mouse_move = pygame.mouse.get_rel()
+            if not all(mouse_move) :
+                pygame.mouse.set_visible(False)
+            else :
+                pygame.mouse.set_visible(True)
+            
 
 
 if ostype == 0 and user_settings.shutdown_rpi :

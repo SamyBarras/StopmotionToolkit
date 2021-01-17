@@ -26,6 +26,6 @@ camIndex = 0
 # change this if your camera do not give proper resolution
 camera_codec = 'MJPG' # H264
 #  DEBUG / INFOS
-show_console = True
+show_console = False
 # shutdown the computer @ end (only for raspberry pi)
 shutdown_rpi = True
