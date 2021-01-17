@@ -29,11 +29,11 @@ class MyFormatter(logging.Formatter):
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
-#handler = logging.StreamHandler()
-handler = logging.StreamHandler(sys.stdout)
-handler = logging.FileHandler(filename='stopmo.log', mode='a')
-handler.setFormatter(simpleFormatter)#MyFormatter()
-logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout) # maybe duplicate with FileHandler ?
+logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log')
+handler = logging.FileHandler(filename=logFile, mode='a', encoding='utf-8')
+handler.setFormatter(MyFormatter())#MyFormatter()
+logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
 def detectOS ():
