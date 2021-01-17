@@ -250,7 +250,7 @@ def ledBlink ():
     delay = 200 # ms
     change_time = current_time + delay
     show = False
-    while True :
+    while True and GPIO.input(inputbttn) == 1 :
         if IS_SHOOTING is True:
             logging.debug("is shooting")
             current_time = pygame.time.get_ticks()
@@ -267,6 +267,8 @@ def ledBlink ():
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+    else :
+        GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             
 
 def capture() :
