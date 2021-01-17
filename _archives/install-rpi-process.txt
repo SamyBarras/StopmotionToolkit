@@ -42,3 +42,8 @@ nano /home/pi/.config/autostart/stopmotool.desktop
     sudo wget http://example.com/images/splash.png
     sudo sed -i 's/pix/mytheme/g; s/Raspberry Pi/My/g' mytheme.plymouth
     sudo sed -i 's/pix/mytheme/g' /etc/plymouth/plymouthd.conf
+
+
+# force output display for headless mode
+# https://www.enricozini.org/blog/2020/himblick/raspberry-pi-4-force-video-mode-at-boot/
+sudo nano /boot/config.tx

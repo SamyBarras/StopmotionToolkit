@@ -23,15 +23,16 @@ class MyFormatter(logging.Formatter):
                 logging.ERROR: 31,
                 logging.FATAL: 31,
                 logging.DEBUG: 36
-            }.get(record.levelno, 0)
-            self._style._fmt = f"\033[{color}m%(levelname)s\033[0m: %(message)s"
+            }.get(record.levelno, 0)   
+            self._style._fmt = f"[{color}m%(levelname)s\033[0m: %(message)s"
         return super().format(record)
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 #handler = logging.StreamHandler()
 handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(MyFormatter())
+handler = logging.FileHandler(filename='stopmo.log', mode='a')
+handler.setFormatter(simpleFormatter)#MyFormatter()
 logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
@@ -78,6 +79,8 @@ def setupProjectDir():
         else :
             # 0 and 1 are OSX and Linux systems
             drivepath = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+    else :
+        logging.debug(drivepath)
 
     if not user_settings.PROJECT_NAME : # project_name custom paramater is not set... we use time to make unik name
         dirname = datetime.datetime.now().strftime('%Y%m%d') #_%H%M%S')
