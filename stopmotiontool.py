@@ -54,7 +54,7 @@ def setupProjectDir():
     '''
         This way of checking external drives needs startX to work
     '''
-    logging.info("==== setup working dir =====")
+    logging.info("==== setup project dir =====")
     partitions = psutil.disk_partitions()
     drivesize = 0
     regEx = '\A' + constants.drives[ostype]
@@ -93,18 +93,24 @@ def setupProjectDir():
     return projectdir
 
 def setupTakeDir(projectdir, _t):
+    logging.info("==== setup working dir =====")
+
     if not os.path.exists(projectdir):
         takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
     else :
-        # project already exists 
-        # let's get last take number
-        # and create a new take (incremented)
-        lasttakedir = os.path.basename(max([os.path.join(projectdir, d) for d in os.listdir(projectdir)], key=os.path.getmtime)).split("_")
-        if lasttakedir[0] == user_settings.TAKE_NAME :
-            # same take name (should always be)
-            # here we assume dir has name "XXXXXXXX_00"
-            lasttakenum = int(lasttakedir[-1])
-            _t = lasttakenum+1
+        takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
+        tmpdir = os.path.join(projectdir, takeDir)
+        if os.path.exists(tmpdir) :
+            # project already exists 
+            # let's get last take number
+            # and create a new take (incremented)
+            lasttakedir = os.path.basename(max([os.path.join(projectdir, d) for d in os.listdir(projectdir)], key=os.path.getmtime)).split("_")
+            if lasttakedir[0] == user_settings.TAKE_NAME :
+                # same take name (should always be)
+                # here we assume dir has name "XXXXXXXX_00"
+                lasttakenum = int(lasttakedir[-1])
+                _t = lasttakenum+1
+            #
             takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
     
     workingdir = os.path.join(projectdir, takeDir)
@@ -123,6 +129,20 @@ def setupTakeDir(projectdir, _t):
         # throw error --> can't setup working dir
         logging.error("error while creating working dir")
         quit()
+
+def newTake () :
+    # called each time we start a new shot (takes)
+    global frames, myCamera, takenum, take, workingdir
+    # setup take and new dir
+    workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
+    # reset everything
+    take = user_settings.TAKE_NAME + str(takenum).zfill(2)
+    frames = collections.deque(maxlen=maxFramesBuffer)
+    myCamera.lastframe = None
+    myCamera.frameCount = 0
+    # update takenum for next time
+    takenum += 1
+    return workingdir
 
 def getCameraDevice():
     res_w = 0
@@ -341,19 +361,6 @@ def actionButtn(inputbttn):
     else :
         return None # not needed, just for clarity
 
-def newTake () :
-    # called each time we start a new shot (takes)
-    global frames, myCamera, takenum, take, workingdir
-    # setup take and new dir
-    workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
-    # reset everything
-    take = user_settings.TAKE_NAME + str(takenum).zfill(2)
-    frames = collections.deque(maxlen=maxFramesBuffer)
-    myCamera.lastframe = None
-    myCamera.frameCount = 0
-    # update takenum for next time
-    takenum += 1
-    return workingdir
 
 def quit():
     myCamera.release()
