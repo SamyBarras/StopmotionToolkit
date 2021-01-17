@@ -16,7 +16,7 @@ from common import *
 # logging     https://stackoverflow.com/questions/14844970/modifying-logging-message-format-based-on-message-logging-level-in-python3
 class MyFormatter(logging.Formatter):
     def format(self, record):
-        if record.levelno == logging.INFO:
+        if record.levelno == logging.DEBUG:
             self._style._fmt = "%(message)s"
         else:
             color = {
@@ -50,7 +50,7 @@ def detectOS ():
         sys.exit(2)
     return ostype
 
-def setupDir(_t):
+def setupProjectDir():
     logging.info("==== setup working dir =====")
     partitions = psutil.disk_partitions()
     drivesize = 0
@@ -80,19 +80,23 @@ def setupDir(_t):
         dirname = datetime.datetime.now().strftime('%Y%m%d') #_%H%M%S')
     else :
         # desktop / PROJECT_NAME / take
-        dirname = datetime.datetime.now().strftime('%Y%m%d') + "_" + user_settings.PROJECT_NAME
-    
-    #workingdir = os.path.join(drivepath, "stopmotion", dirname, _t)
-    #datetime.datetime.now().strftime('%Y_%m_%d/%H%M%S')) # use time to name dir
-    # # + "_" + user_settings.project_name)
+        dirname = datetime.datetime.now().strftime('%Y%m%d') + "_" + user_settings.YYYYMMDD_PROJECT_NAME
+
     projectdir = os.path.join(drivepath, "stopmotion", dirname)
+    # do not create dir here, if it's not existing it will ask for new take from 0
+    return projectdir
+
+def setupTakeDir(projectdir, _t):
     if not os.path.exists(projectdir):
         takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
     else :
-        # project already exists -> we create a new take
+        # project already exists 
+        # let's get last take number
+        # and create a new take (incremented)
         lasttakedir = os.path.basename(max([os.path.join(projectdir, d) for d in os.listdir(projectdir)], key=os.path.getmtime)).split("_")
         if lasttakedir[0] == user_settings.TAKE_NAME :
             # same take name (should always be)
+            # here we assume dir has name "XXXXXXXX_00"
             lasttakenum = int(lasttakedir[-1])
             _t = lasttakenum+1
             takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
@@ -104,7 +108,8 @@ def setupDir(_t):
     HQFilesDir = os.path.join(workingdir,"HQ")
     if not os.path.exists(HQFilesDir) : 
         os.makedirs(HQFilesDir)
-
+    
+    # last checks before continuing
     if os.path.exists(workingdir) and os.path.exists(HQFilesDir):
         logging.info("Working directory : %s", workingdir)
         return workingdir, _t
@@ -210,19 +215,18 @@ def defineDisplaySize(camsize, screen_w, screen_h) :
 
 def displayAnimation():
     global IS_PLAYING
-    if outputdisplay is True :
-        while IS_PLAYING :
-            for i in frames : # frames is pygame.surface array            
-                screen.blit(i, (0, 0))
-                pygame.display.flip()
-                time.sleep(1/user_settings.FPS) # to keep framerate
-            IS_PLAYING=False
+    while IS_PLAYING :
+        for i in frames : # frames is pygame.surface array           
+            screen.blit(i, surf_center)
+            pygame.display.flip()
+            time.sleep(1/user_settings.FPS) # to keep framerate 
+        IS_PLAYING=False
 
 def displayCameraStream(buffer):
+    global IS_PLAYING
     # display video stream
-    #print(buffer)
     if buffer is not None :
-        screen.blit(image_processing.rescaleToDisplay(buffer, SCREEN_SIZE), (0, 0))
+        preview.blit(image_processing.rescaleToDisplay(buffer, SCREEN_SIZE), (0,0))
 
     # display onion skin
     if user_settings.ONIONSKIN >= 1 :
@@ -234,27 +238,30 @@ def displayCameraStream(buffer):
                 frame = frames[-f] # frames is pygame.surface array
                 img = frame.copy()
                 img.set_alpha(alpha)
-                screen.blit(img, (0, 0))
+                preview.blit(img, (0,0))
             else :
                 pass
             f -= 1
-    
-    if user_settings.show_console is True :
-        screen.blit(infos_take,(25,25))
-        screen.blit(infos_cam, (25,50))
-        screen.blit(infos_fps, (25,75))
-    
-    pygame.display.flip()
+            
 
 def ledBlink ():
     global IS_SHOOTING, IS_PLAYING
+    current_time = pygame.time.get_ticks()
+    delay = 200 # ms
+    change_time = current_time + delay
+    show = False
     while True :
         if IS_SHOOTING is True:
             logging.debug("is shooting")
-            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
-            time.sleep(0.2)
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            time.sleep(0.2)
+            current_time = pygame.time.get_ticks()
+            if current_time >= change_time:
+                # time of next change 
+                change_time = current_time + delay
+                show = not show
+                GPIO.output(constants.OUTPUT_LED,show)
+            # time.sleep(0.2)
+            # GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            # time.sleep(0.2)
         elif IS_PLAYING is True :
             logging.debug("is playing")
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
@@ -313,7 +320,6 @@ def actionButtn(inputbttn):
         elif pressed_time >= constants.PRESSINGTIME :
             logging.debug("long press --> new take")
             newTake()
-            infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0))
             return 0
 
     elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
@@ -336,35 +342,12 @@ def actionButtn(inputbttn):
     
     else :
         return None # not needed, just for clarity
-    
-    # alternative ---> detect if both buttons are pressed together
-    # if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0:
-    #     if GPIO.input(constants.PLAY_BUTTON) == 0 :
-    #         print("two buttons pressed together !")
-    #         return 0
-    #     else :
-    #         print("capture")
-    #         capture()
-    #         return 1
-    # elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0:
-    #     if GPIO.input(constants.SHOT_BUTTON) == 0 :
-    #         print("two buttons pressed together !")
-    #         return 0
-    #     else :
-    #         if outputdisplay is True :
-    #             IS_PLAYING = True
-    #             print("play anim")
-    #         else :
-    #             print("no display to sho animation")
-    #         return 2
-    # else :
-    #     return None # not needed, just for clarity
 
 def newTake () :
     # called each time we start a new shot (takes)
     global frames, workingdir, myCamera, takenum, take
     # setup take and new dir
-    workingdir, takenum = setupDir(takenum) # path of working dir
+    workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
     # reset everything
     take = user_settings.TAKE_NAME + str(takenum).zfill(2)
     frames = collections.deque(maxlen=maxFramesBuffer)
@@ -408,29 +391,35 @@ if __name__== "__main__":
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded    
     # ==== new project ====
+    projectdir = setupProjectDir()
+    workingdir = None
     # ==== new take =====
     newTake ()
-    # ============ output last setup
-    # detect output display
+    # ============ output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
     # not in headless mode
     if outputdisplay is True:
         SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
         logging.info("Window size : %s", SCREEN_SIZE)
-        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % image_processing.centerScreen((w, h), SCREEN_SIZE)
-        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN
-        
+        #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % image_processing.centerScreen((w, h), SCREEN_SIZE)
+        preview = pygame.Surface(SCREEN_SIZE)
+        screen = pygame.display.set_mode((w,h), pygame.RESIZABLE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
+        #surf_center = image_processing.centerScreen((w, h), SCREEN_SIZE)
+        surf_center = (
+            (w-preview.get_width())/2,
+            (h-preview.get_height())/2
+        )
         # font and info elements
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 15)
-        infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0))
-        infos_cam = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0))
-        infos_fps = myfont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0))
+        infos_cam = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
+        infos_fps = myfont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
         pygame.display.set_caption('stopmotion project')
+
     else :
         logging.warning("Stopmotion tool run in headless mode !")
     
-    # ============ ready
+    # ============ ready to animate
     logging.info("==== ready to animate :) =====")
     # main loop
     finish = False
@@ -441,12 +430,24 @@ if __name__== "__main__":
         frameBuffer = myCamera.read()
         # then function needed only if output display is available (we have a screen)
         if outputdisplay is True :
-            fpsconsole = myfont.render(str(clock.get_fps()), False, (250, 0, 0))
             # switch between animation preview and onion skin view
             if IS_PLAYING is True :
                 displayAnimation()
             else :
                 displayCameraStream(frameBuffer)
+            
+            # update the whole screen
+            screen.blit(preview, surf_center)
+
+            if user_settings.show_console is True :
+                fpsconsole = myfont.render(str("%.2f" % clock.get_fps()), False, (250, 0, 0), (0,0,0))
+                infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0), (0,0,0))
+                screen.blit(infos_take,(25,25))
+                screen.blit(infos_cam, (25,50))
+                screen.blit(infos_fps, (25,75))
+                screen.blit(fpsconsole, (25,90))
+    
+            pygame.display.flip()
             
             # pygame events
             for event in pygame.event.get():
@@ -456,10 +457,10 @@ if __name__== "__main__":
                     if event.key == K_t :
                         capture()
                     if event.key == K_p :
-                        IS_PLAYING = True
+                        if outputdisplay is True :
+                            IS_PLAYING = True
                     if event.key == K_n :
                         newTake()
-                        infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0))
                     if event.key == K_q :
                         quit()
                     if event.key == K_ESCAPE:

@@ -1,0 +1,41 @@
+
+
+sudo apt-get python3
+pip3 install numpy
+pip3 install opencv-python
+sudo apt-get install -y libcblas-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev  libqtgui4  libqt4-test
+
+pip3 install psutil
+pip3 intall pygame
+pip3 install PySDL2
+pip3 install RPi.GPIO
+
+sudo apt-get install libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev subversion libportmidi-dev ffmpeg libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev
+sudo apt-get install libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev
+
+
+# autostart
+# https://www.digikey.com/en/maker/projects/how-to-run-a-raspberry-pi-program-on-startup/cc16cb41a3d447b8aaacf1da14368b13
+sudo apt-get install xterm -y
+mkdir /home/pi/.config/autostart
+nano /home/pi/.config/autostart/stopmotool.desktop
+        [Desktop Entry]
+        Type=Application
+        Name=StopmotionTool
+        Exec=xterm -hold -e '/usr/bin/python3 /stopmotiontool/stopmotiontool.py'
+
+#
+#https://scribles.net/silent-boot-on-raspbian-stretch-in-console-mode/
+#OR
+#https://scribles.net/silent-boot-up-on-raspbian-stretch/
+#
+#changing splash screen and themes
+    cd /usr/share/plymouth/themes
+    sudo cp -a pix mytheme
+    cd mytheme
+    sudo mv pix.plymouth mytheme.plymouth
+    sudo mv pix.script mytheme.script
+    sudo rm splash.png
+    sudo wget http://example.com/images/splash.png
+    sudo sed -i 's/pix/mytheme/g; s/Raspberry Pi/My/g' mytheme.plymouth
+    sudo sed -i 's/pix/mytheme/g' /etc/plymouth/plymouthd.conf
