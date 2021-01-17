@@ -267,11 +267,12 @@ def ledBlink ():
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         else :
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+            
 
 def capture() :
-    global IS_SHOOTING, take
+    global IS_SHOOTING
+    # start shooting
     IS_SHOOTING = True
-
     if outputdisplay is True :
         myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
     else :
@@ -281,7 +282,7 @@ def capture() :
         frames.append(myCamera.lastframe)
     else :
         logging.error("Error while shooting : last frame is empty !")
-
+    # end of shooting
     IS_SHOOTING = False
 
 # GPIO FUNCTIONS
@@ -311,6 +312,7 @@ def actionButtn(inputbttn):
         #start counting pressed time
         pressed_time=time.monotonic()
         while GPIO.input(inputbttn) == 0 :
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             pass
         pressed_time=time.monotonic()-pressed_time
         if pressed_time < constants.PRESSINGTIME :
@@ -386,15 +388,18 @@ if __name__== "__main__":
         setupGpio()
         leds = Thread(target=ledBlink, daemon=True)
         leds.start()
+
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
     myCamera.start() # threaded    
+
     # ==== new project ====
     projectdir = setupProjectDir()
     workingdir = None
     # ==== new take =====
     newTake ()
+
     # ============ output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
     # not in headless mode
@@ -423,7 +428,6 @@ if __name__== "__main__":
     logging.info("==== ready to animate :) =====")
     # main loop
     finish = False
-    IS_PLAYING = False
     while not finish:
         # function which do not need output display
         clock.tick(50)
@@ -433,20 +437,21 @@ if __name__== "__main__":
             # switch between animation preview and onion skin view
             if IS_PLAYING is True :
                 displayAnimation()
-            else :
+            else:
                 displayCameraStream(frameBuffer)
-            
-            # update the whole screen
-            screen.blit(preview, surf_center)
 
             if user_settings.show_console is True :
+                screen.blit(preview, surf_center) # console on top of preview ?
                 fpsconsole = myfont.render(str("%.2f" % clock.get_fps()), False, (250, 0, 0), (0,0,0))
                 infos_take = myfont.render("Take : " + os.path.basename(os.path.dirname(workingdir)) + "/" + os.path.basename(workingdir), False, (250, 0, 0), (0,0,0))
                 screen.blit(infos_take,(25,25))
                 screen.blit(infos_cam, (25,50))
                 screen.blit(infos_fps, (25,75))
                 screen.blit(fpsconsole, (25,90))
-    
+            else :
+                screen.fill((0,0,0))
+                screen.blit(preview, surf_center)
+
             pygame.display.flip()
             
             # pygame events
@@ -454,6 +459,8 @@ if __name__== "__main__":
                 if event.type == pygame.QUIT:
                     finish = True
                 if event.type == KEYDOWN :
+                    if event.key == K_c :
+                        user_settings.show_console = not user_settings.show_console
                     if event.key == K_t :
                         capture()
                     if event.key == K_p and outputdisplay is True :
