@@ -30,7 +30,8 @@ class MyFormatter(logging.Formatter):
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
-handler = logging.StreamHandler()
+#handler = logging.StreamHandler()
+handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(MyFormatter())
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
@@ -457,7 +458,9 @@ if __name__== "__main__":
                         IS_PLAYING = True
                     if event.key == K_n :
                         newTake()
-                    if event.key == K_q or event.key == K_ESCAPE:
+                    if event.key == K_q :
+                        quit()
+                    if event.key == K_ESCAPE:
                         finish = True
 
 def quit ():
