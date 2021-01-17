@@ -456,11 +456,12 @@ if __name__== "__main__":
                 if event.type == KEYDOWN :
                     if event.key == K_t :
                         capture()
-                    if event.key == K_p :
-                        if outputdisplay is True :
+                    if event.key == K_p and outputdisplay is True :
                             IS_PLAYING = True
                     if event.key == K_n :
                         newTake()
+                    if event.key == K_f and outputdisplay is True :
+                        pygame.display.toggle_fullscreen()
                     if event.key == K_q :
                         quit()
                     if event.key == K_ESCAPE:
