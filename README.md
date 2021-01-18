@@ -45,8 +45,3 @@ n : new take
 f : toogle fulsscreen (buggy)
 q : quit (return to command line / Desktop)
 ESC : quit (will shutdon the RaspberryPi)
-
-
-usb_drive   /stopmotion     /PROJECTDIR /                       -> le dossier du projet (de base nommé à la date du jour : YYYYMMDD)
-                            /PROJECTDIR / take_## /             -> la prise (plan) actuelle, contient toutes les photos low res
-                            /PROJECTDIR / take_## / HQ          -> les fichiers high res de la prise actuelle
