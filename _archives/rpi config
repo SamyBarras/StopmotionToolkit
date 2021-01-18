@@ -1,9 +1,0 @@
-cd /usr/share/plymouth/themes
-sudo cp -a pix mytheme
-cd mytheme
-sudo mv pix.plymouth mytheme.plymouth
-sudo mv pix.script mytheme.script
-sudo rm splash.png
-sudo wget http://example.com/images/splash.png
-sudo sed -i 's/pix/mytheme/g; s/Raspberry Pi/My/g' mytheme.plymouth
-sudo sed -i 's/pix/mytheme/g' /etc/plymouth/plymouthd.conf
