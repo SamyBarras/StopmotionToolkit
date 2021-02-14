@@ -349,6 +349,7 @@ def actionButtn(inputbttn):
     will define to shot a frame / play anim / or get out of waiting screen
     --> need to recode this to allow combined buttons
     '''
+    action = -1
     if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0 :
         #start counting pressed time
         pressed_time=time.monotonic()
@@ -357,14 +358,14 @@ def actionButtn(inputbttn):
         pressed_time=time.monotonic()-pressed_time
         if pressed_time < constants.PRESSINGTIME :
             logging.debug("short press -> capture")
-            capture()
-            return 1
+            #capture()
+            #return 1
+            action = 0
         elif pressed_time >= constants.PRESSINGTIME :
             logging.debug("long press --> new take")
-            SETUP = True
-            #
-            newTake()
-            return 0
+            #SETUP = True
+            #newTake()
+            action = 1 #return 0
 
     elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
         #start counting pressed time
@@ -374,18 +375,39 @@ def actionButtn(inputbttn):
         pressed_time=time.monotonic()-pressed_time
         if pressed_time < constants.PRESSINGTIME :
             if outputdisplay is True :
-                IS_PLAYING = True
+                #IS_PLAYING = True
                 logging.debug("play anim")
+                action = 2
             else :
                 logging.debug("no display to show animation")
-            return 2
+                action = -1 #return 2
         elif pressed_time >= constants.PRESSINGTIME :
             logging.debug("long press --> shut down")
-            finish = True
-            return 0
+            #finish = True
+            action = 3 #return 0
     
     else :
-        return None # not needed, just for clarity
+        action = -1 #return None # not needed, just for clarity
+    
+    if GPIO.input(inputbttn) == 1 :
+        switch(action){
+            case 0 :
+                capture()
+                break;
+            case 1 :
+                SETUP = True
+                newTake()
+                break;
+            case 2 :
+                IS_PLAYING = True
+                break;
+            case 3 :
+                finish = True
+                break;
+            case -1 :
+                break;
+        }
+        return action
 
 
 def quit():
