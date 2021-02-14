@@ -133,6 +133,10 @@ def setupTakeDir(projectdir, _t):
 def newTake () :
     # called each time we start a new shot (takes)
     global frames, myCamera, takenum, take, workingdir
+    # export last take as movie file
+    if frames is not None and user_settings.EXPORT_ANIM is True :
+        logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
+        image_processing.compileAnimation(workingdir, frames, take)
     # setup take and new dir
     workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
     # reset everything
@@ -160,12 +164,13 @@ def getCameraDevice():
             quit()
     else :
         id = -1
-        r = (0, 2)
+        r = (0, 3)
         for i in range(r[0], r[1]):
             tmp = None
             try :
-                cap = cam.streamConstructor (i, ostype)
-            except (RuntimeError, TypeError, NameError, ValueError):
+                cap = cam.streamConstructor (i, ostype, constants.codecs[ostype])
+            except :
+                logging.error("Unexpected error:")
                 break
             else :    
                 if cap.read()[0]:
@@ -181,7 +186,7 @@ def getCameraDevice():
 
         if id == -1 :
             # throw error here --> no camera found
-            logging.error("Camera not found !")
+            logging.error("Camera not found at all !")
             quit()
         else :
             logging.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
@@ -337,6 +342,7 @@ def actionButtn(inputbttn):
             return 1
         elif pressed_time >= constants.PRESSINGTIME :
             logging.debug("long press --> new take")
+            #
             newTake()
             return 0
 
@@ -363,15 +369,14 @@ def actionButtn(inputbttn):
 
 
 def quit():
-    myCamera.release()
     pygame.quit()
     if ostype == 0 :
         GPIO.cleanup()
     # export animation before quitting totally
-    if user_settings.EXPORT_ANIM is True :
+    if user_settings.EXPORT_ANIM is True and frames is not None :
         logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
         image_processing.compileAnimation(workingdir, frames, take)
-     
+    print("Goodbye Animator !")
     sys.exit()
     # finally, we quit !
 
@@ -403,7 +408,8 @@ if __name__== "__main__":
 
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
-    myCamera = cam.cam(video_device, ostype, user_settings.camera_codec) # video_device, os, codec, buffer
+    print(ostype, constants.codecs[ostype])
+    myCamera = cam.cam(video_device, ostype, constants.codecs[ostype]) # video_device, os, codec, buffer
     myCamera.start() # threaded    
 
     # ==== new project ====
@@ -464,9 +470,11 @@ if __name__== "__main__":
                     if event.key == K_f and outputdisplay is True :
                         pygame.display.toggle_fullscreen()
                     if event.key == K_q :
+                        myCamera.release()
                         quit()
                         sys.exit()
                     if event.key == K_ESCAPE:
+                        myCamera.release()
                         quit()
                         finish = True
 

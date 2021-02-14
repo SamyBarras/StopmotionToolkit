@@ -71,6 +71,7 @@ def compileAnimation(wdir, frames, name): #channel
         logging.info("Animation compiled.")
     else :
         logging.warning("No files to compile as videofile.")
+    return True
 
 def centerScreen(screen_res, window_res):
     x = screen_res[0]/2 - window_res[0]/2
