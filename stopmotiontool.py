@@ -390,24 +390,19 @@ def actionButtn(inputbttn):
         action = -1 #return None # not needed, just for clarity
     
     if GPIO.input(inputbttn) == 1 :
-        switch(action){
-            case 0 :
-                capture()
-                break;
-            case 1 :
-                SETUP = True
-                newTake()
-                break;
-            case 2 :
-                IS_PLAYING = True
-                break;
-            case 3 :
-                finish = True
-                break;
-            case -1 :
-                break;
-        }
-        return action
+        if action == 0 :
+            capture()
+        elif action == 1 :
+            SETUP = True
+            newTake()
+        elif action == 2 :
+            IS_PLAYING = True
+        elif action == 3 :
+            finish = True
+        else :
+            print("no action button")
+
+    return action
 
 
 def quit():
