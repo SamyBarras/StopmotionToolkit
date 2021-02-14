@@ -7,7 +7,7 @@ echo "=========== install python3"
 sudo apt-get install -y python3
 
 echo "=========== install dependencies"
-sudo apt-get install -y libcblas-dev libatlas3-base libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev  libqtgui4  libqt4-test 
+sudo apt-get install -y libatlas-base-dev libatlas3-base libhdf5-dev libhdf5-serial-dev libjasper-dev  libqtgui4  libqt4-test 
 sudo apt-get install -y libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev subversion libportmidi-dev ffmpeg libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev
 sudo apt-get install -y libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev
 
@@ -20,5 +20,5 @@ sudo apt-get autoclean
 
 
 echo "=========== install python requirements"
-cd /stopmotiontool/
+cd ../
 pip3 install -r requirements.txt
