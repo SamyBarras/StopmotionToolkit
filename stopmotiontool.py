@@ -350,45 +350,53 @@ def actionButtn(inputbttn):
     --> need to recode this to allow combined buttons
     '''
     action = -1
-    if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0 :
-        #start counting pressed time
-        pressed_time=time.monotonic()
-        while GPIO.input(inputbttn) == 0 :
-            pass
-        pressed_time=time.monotonic()-pressed_time
-        if pressed_time < constants.PRESSINGTIME :
-            logging.debug("short press -> capture")
-            #capture()
-            #return 1
-            action = 0
-        elif pressed_time >= constants.PRESSINGTIME :
-            logging.debug("long press --> new take")
-            #SETUP = True
-            #newTake()
-            action = 1 #return 0
+    # if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0 :
+    #     #start counting pressed time
+    #     pressed_time=time.monotonic()
+    #     while GPIO.input(inputbttn) == 0 :
+    #         pass
+    #     pressed_time=time.monotonic()-pressed_time
+    #     if pressed_time < constants.PRESSINGTIME :
+    #         logging.debug("short press -> capture")
+    #         #capture()
+    #         #return 1
+    #         action = 0
+    #     elif pressed_time >= constants.PRESSINGTIME :
+    #         logging.debug("long press --> new take")
+    #         #SETUP = True
+    #         #newTake()
+    #         action = 1 #return 0
 
-    elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
-        #start counting pressed time
-        pressed_time=time.monotonic()
-        while GPIO.input(inputbttn) == 0 :
-            pass
+    # elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
+    #     #start counting pressed time
+    #     pressed_time=time.monotonic()
+    #     while GPIO.input(inputbttn) == 0 :
+    #         pass
+    #     pressed_time=time.monotonic()-pressed_time
+    #     if pressed_time < constants.PRESSINGTIME :
+    #         if outputdisplay is True :
+    #             #IS_PLAYING = True
+    #             logging.debug("play anim")
+    #             action = 2
+    #         else :
+    #             logging.debug("no display to show animation")
+    #             action = -1 #return 2
+    #     elif pressed_time >= constants.PRESSINGTIME :
+    #         logging.debug("long press --> shut down")
+    #         #finish = True
+    #         action = 3 #return 0
+    
+    # else :
+    #     action = -1 #return None # not needed, just for clarity
+    
+    #start counting pressed time
+    pressed_time=time.monotonic()
+    while GPIO.input(inputbttn) == 0 :
         pressed_time=time.monotonic()-pressed_time
-        if pressed_time < constants.PRESSINGTIME :
-            if outputdisplay is True :
-                #IS_PLAYING = True
-                logging.debug("play anim")
-                action = 2
-            else :
-                logging.debug("no display to show animation")
-                action = -1 #return 2
-        elif pressed_time >= constants.PRESSINGTIME :
-            logging.debug("long press --> shut down")
-            #finish = True
-            action = 3 #return 0
-    
-    else :
-        action = -1 #return None # not needed, just for clarity
-    
+        if pressed_time >= constants.PRESSINGTIME :
+            print("long press")
+            break
+
     if GPIO.input(inputbttn) == 1 :
         if action == 0 :
             capture()
