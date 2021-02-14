@@ -133,7 +133,9 @@ def setupTakeDir(projectdir, _t):
 
 def newTake () :
     # called each time we start a new shot (takes)
-    global frames, myCamera, takenum, take, workingdir
+    global frames, myCamera, takenum, take, workingdir, SETUP
+
+    animSetup.show(screen, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
         logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
@@ -147,6 +149,8 @@ def newTake () :
     myCamera.frameCount = 0
     # update takenum for next time
     takenum += 1
+    SETUP = False
+    animSetup.hide(screen, surf_center)
     return workingdir
 
 def getCameraDevice():
@@ -280,14 +284,22 @@ def displayCameraStream(buffer):
             
 
 def ledBlink ():
-    global IS_SHOOTING, IS_PLAYING
+    global IS_SHOOTING, IS_PLAYING, SETUP
     while True :
         if IS_SHOOTING is True:
-            time.sleep(0.2)
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-            time.sleep(0.2)
+            time.sleep(0.1)
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+            time.sleep(0.1)
         elif IS_PLAYING is True :
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+        elif LONG_PRESS is True :
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+        elif SETUP is True :
+            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
+            time.sleep(0.3)
+            GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
+            time.sleep(0.3)
         else :
             GPIO.output(constants.OUTPUT_LED,GPIO.HIGH)
     
@@ -299,7 +311,7 @@ def capture() :
     global IS_SHOOTING
     # start shooting
     IS_SHOOTING = True
-    animTake.show()
+    animTake.show(screen, surf_center)
     if outputdisplay is True :
         myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
     else :
@@ -312,7 +324,7 @@ def capture() :
     # end of shooting
     #pygame.time.delay(3000)
     IS_SHOOTING = False
-    animTake.hide()
+    animTake.hide(screen, surf_center)
 
 # GPIO FUNCTIONS
 def setupGpio():
@@ -331,7 +343,7 @@ def setupGpio():
     logging.info("GPIO pins are ready ! ")
 
 def actionButtn(inputbttn):
-    global IS_PLAYING, IS_SHOOTING, finish
+    global IS_PLAYING, IS_SHOOTING, finish, SETUP
     '''
     function called each time a button is pressed
     will define to shot a frame / play anim / or get out of waiting screen
@@ -349,6 +361,7 @@ def actionButtn(inputbttn):
             return 1
         elif pressed_time >= constants.PRESSINGTIME :
             logging.debug("long press --> new take")
+            SETUP = True
             #
             newTake()
             return 0
@@ -393,6 +406,7 @@ if __name__== "__main__":
     frames = None # framebuffer for animation
     IS_PLAYING = False
     IS_SHOOTING = False
+    SETUP = True
     SCREEN_SIZE = (0,0)
     screen = None
     workingdir = None
@@ -418,12 +432,6 @@ if __name__== "__main__":
     myCamera = cam.cam(video_device, ostype, constants.codecs[ostype]) # video_device, os, codec, buffer
     myCamera.start() # threaded    
 
-    # ==== new project ====
-    projectdir = setupProjectDir()
-    # ==== new take =====
-    workingdir = newTake ()
- 
- 
     # ============ output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
     # not in headless mode
@@ -438,7 +446,7 @@ if __name__== "__main__":
         )
         # font and info elements
         pygame.font.init()
-        myfont = pygame.font.SysFont('Futura', 15)
+        myfont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
         infos_cam = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
         infos_fps = myfont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
         pygame.display.set_caption('stopmotion project')
@@ -447,13 +455,17 @@ if __name__== "__main__":
         pygame.mouse.get_rel()
 
         # ==== sprites ======
-        all_sprites = pygame.sprite.Group()
-        animTake = animation.Animation(screen)
-        all_sprites.add(animTake)
+        animTake = animation.Animation(SCREEN_SIZE, (255,0,0), 128) # size, color, alpha
+        animSetup = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "new take !") # size, color, alpha
 
     else :
         logging.warning("Stopmotion tool run in headless mode !")
     
+    # ==== new project ====
+    projectdir = setupProjectDir()
+    # ==== new take =====
+    workingdir = newTake ()
+
     # ============ ready to animate
     logging.info("==== ready to animate :) =====")
     # main loop
@@ -461,12 +473,10 @@ if __name__== "__main__":
     prev_frame_time = time.time()
     while not finish:
         # function which do not need output display
-        #clock.tick(50)
         frameBuffer = myCamera.read()
         new_frame_time = time.time()
         # then function needed only if output display is available (we have a screen)
         if outputdisplay is True :
-            all_sprites.update()
             # pygame events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -479,6 +489,7 @@ if __name__== "__main__":
                     if event.key == K_p and outputdisplay is True :
                         IS_PLAYING = True
                     if event.key == K_n :
+                        SETUP = True
                         newTake()
                     if event.key == K_f and outputdisplay is True :
                         pygame.display.toggle_fullscreen()
@@ -502,14 +513,16 @@ if __name__== "__main__":
                 # calculate framerate
                 fps = 1/(new_frame_time-prev_frame_time) 
                 fpsconsole = myfont.render(str("%.2f" % fps), False, (250, 0, 0), (0,0,0))
-                infos_take = myfont.render("Take : " + workingdir, False, (250, 0, 0), (0,0,0))
-                screen.blit(infos_take,(25,25))
                 screen.blit(infos_cam, (25,50))
                 screen.blit(infos_fps, (25,75))
                 screen.blit(fpsconsole, (25,90))
             else :
                 screen.fill((0,0,0))
                 screen.blit(preview, surf_center)
+
+            infos_take = myfont.render(workingdir, True, (250, 255, 255))
+            screen.blit(infos_take,(25,25))
+
             #all_sprites.draw(screen)
             pygame.display.flip()
             prev_frame_time = new_frame_time
