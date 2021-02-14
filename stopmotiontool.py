@@ -38,6 +38,7 @@ logger.addHandler(handler)
 
 def detectOS ():
     ostype = None
+    #print(sys.platform) alternative, will output : linux / darwin (osx) / win
     logging.debug("os : %s - %s ", os.uname()[1], os.uname()[4])
     if (os.uname()[4].startswith("arm")) : # rpi
         ostype = 0
@@ -247,8 +248,11 @@ def defineDisplaySize(camsize, screen_w, screen_h) :
 def displayAnimation():
     global IS_PLAYING
     while IS_PLAYING :
+        #animTake.change()
+        #all_sprites.update()
         for i in frames : # frames is pygame.surface array           
             screen.blit(i, surf_center)
+            #all_sprites.draw(screen)
             pygame.display.flip()
             time.sleep(1/user_settings.FPS) # to keep framerate 
         IS_PLAYING=False
@@ -295,6 +299,7 @@ def capture() :
     global IS_SHOOTING
     # start shooting
     IS_SHOOTING = True
+    animTake.show()
     if outputdisplay is True :
         myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
     else :
@@ -305,7 +310,9 @@ def capture() :
     else :
         logging.error("Error while shooting : last frame is empty !")
     # end of shooting
+    #pygame.time.delay(3000)
     IS_SHOOTING = False
+    animTake.hide()
 
 # GPIO FUNCTIONS
 def setupGpio():
@@ -408,7 +415,6 @@ if __name__== "__main__":
 
     # camera initialisation
     video_device = getCameraDevice()    # array [camera_id, width, height]
-    print(ostype, constants.codecs[ostype])
     myCamera = cam.cam(video_device, ostype, constants.codecs[ostype]) # video_device, os, codec, buffer
     myCamera.start() # threaded    
 
@@ -416,7 +422,8 @@ if __name__== "__main__":
     projectdir = setupProjectDir()
     # ==== new take =====
     workingdir = newTake ()
-
+ 
+ 
     # ============ output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
     # not in headless mode
@@ -439,6 +446,11 @@ if __name__== "__main__":
         pygame.mouse.set_visible(False)
         pygame.mouse.get_rel()
 
+        # ==== sprites ======
+        all_sprites = pygame.sprite.Group()
+        animTake = animation.Animation(screen)
+        all_sprites.add(animTake)
+
     else :
         logging.warning("Stopmotion tool run in headless mode !")
     
@@ -454,6 +466,7 @@ if __name__== "__main__":
         new_frame_time = time.time()
         # then function needed only if output display is available (we have a screen)
         if outputdisplay is True :
+            all_sprites.update()
             # pygame events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -497,7 +510,7 @@ if __name__== "__main__":
             else :
                 screen.fill((0,0,0))
                 screen.blit(preview, surf_center)
-
+            #all_sprites.draw(screen)
             pygame.display.flip()
             prev_frame_time = new_frame_time
             # handle mouse move
@@ -512,4 +525,6 @@ if __name__== "__main__":
 if ostype == 0 and user_settings.shutdown_rpi :
     # turn off RPi at end
     subprocess.call("sudo shutdown -h now", shell=True) # turn off computer !
+
+
     

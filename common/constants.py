@@ -7,3 +7,4 @@ PRESSINGTIME = 4
 # [rpi,osx,windows]
 drives = ["/media/pi","/Volumes",""]
 codecs = ['MJPG','H264']
+IS_SHOOTING = False

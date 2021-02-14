@@ -1,1 +1,1 @@
-__all__ = ["cam","constants", "user_settings","image_processing"]
+__all__ = ["cam","constants", "animation", "user_settings","image_processing"]

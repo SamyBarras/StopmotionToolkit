@@ -89,24 +89,19 @@ def streamConstructor (id, os=0, codec='MJPG', w=1920, h=1080, fps=30):
     cap = cv2.VideoCapture()
     if os == 0 : 
         cap.open(id, apiPreference=cv2.CAP_V4L2)
-        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
-        cap.set(cv2.CAP_PROP_EXPOSURE , -1)
     else :
         cap.open(id)
+        if os == 2 :
+            cap.set(cv2.CAP_PROP_SETTINGS,0) # will show camera settings on WINDOWS OS
+        
     # setup
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*codec))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, w)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
     cap.set(cv2.CAP_PROP_FPS, fps)
-    if os == 0 :
-        cap.set(cv2.CAP_PROP_AUTO_WB, 0)
-    if os == 2 :
-        # on windows, w euse directshow, and we can use prop_settings to configure camera
-        cap.set(cv2.CAP_PROP_SETTINGS,0)
-    # we capture the first frame for the camera to adjust itself to the exposure
-    # cap.read()
-    cap.set(cv2.CAP_PROP_AUTO_WB, 0)
-    cap.set(cv2.CAP_PROP_WB_TEMPERATURE, 2000)
+    # auto exposure and white balance
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75) # 0.75 value to turn off auto_exposure
+    cap.set(cv2.CAP_PROP_AUTO_WB, 0) # 0 to turn off auto_white_balance
 
     return cap
 
