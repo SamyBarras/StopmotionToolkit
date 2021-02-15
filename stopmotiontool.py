@@ -322,7 +322,7 @@ def capture() :
     else :
         logging.error("Error while shooting : last frame is empty !")
     # end of shooting
-    #pygame.time.delay(3000)
+    pygame.time.delay(30)
     IS_SHOOTING = False
     animTake.hide(screen, surf_center)
 
