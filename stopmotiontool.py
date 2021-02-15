@@ -390,29 +390,26 @@ def actionButtn(inputbttn):
     #     action = -1 #return None # not needed, just for clarity
     
     #start counting pressed time
-    longpress = None
     pressed_time=time.monotonic()
     while GPIO.input(inputbttn) == 0 :
+        if time.monotonic()-pressed_time >= constants.PRESSINGTIME :
+            animLongPress.show(screen,surf_center)
         pass
     pressed_time=time.monotonic()-pressed_time
+
     if pressed_time >= constants.PRESSINGTIME :
-        longpress = True
-    else :
-        longpress = False
-    
-    if longpress is True:
         if inputbttn == constants.SHOT_BUTTON :
             SETUP = True
             newTake()
         elif inputbttn == constants.PLAY_BUTTON :
             finish = True
-    elif longpress is False :
+        animLongPress.hide(screen, surf_center)
+    else :
         if inputbttn == constants.SHOT_BUTTON :
             capture()
         elif inputbttn == constants.PLAY_BUTTON :
             IS_PLAYING = True
-    else :
-        print("bad press")
+    
     return action
 
 
@@ -485,6 +482,7 @@ if __name__== "__main__":
         # ==== sprites ======
         animTake = animation.Animation(SCREEN_SIZE, (255,0,0), 128) # size, color, alpha
         animSetup = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "new take !") # size, color, alpha
+        animLongPress = animation.Animation(SCREEN_SIZE, (0,0,0), 170)
 
     else :
         logging.warning("Stopmotion tool run in headless mode !")
