@@ -394,21 +394,22 @@ def actionButtn(inputbttn):
     while GPIO.input(inputbttn) == 0 :
         pressed_time=time.monotonic()-pressed_time
         if pressed_time >= constants.PRESSINGTIME :
-            print("long press")
+            longpress = True
             break
-
-    if GPIO.input(inputbttn) == 1 :
-        if action == 0 :
-            capture()
-        elif action == 1 :
+        else :
+            longpress = False
+    
+    if longpress :
+        if inputbttn == constants.SHOT_BUTTON :
             SETUP = True
             newTake()
-        elif action == 2 :
-            IS_PLAYING = True
-        elif action == 3 :
+        elif inputbttn == constants.PLAY_BUTTON :
             finish = True
-        else :
-            print("no action button")
+    else :
+        if inputbttn == constants.SHOT_BUTTON :
+            capture()
+        elif inputbttn == constants.PLAY_BUTTON :
+            IS_PLAYING = True
 
     return action
 
