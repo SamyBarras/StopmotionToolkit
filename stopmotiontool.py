@@ -135,7 +135,7 @@ def newTake () :
     # called each time we start a new shot (takes)
     global frames, myCamera, takenum, take, workingdir, SETUP, infos_take
 
-    animSetup.show(extra, surf_center)
+    #animSetup.show(extra, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
         logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
@@ -152,7 +152,7 @@ def newTake () :
     SETUP = False
 
     infos_take = defaultFont.render(workingdir, True, (255, 255, 255))
-    animSetup.hide(extra, surf_center)
+    #animSetup.hide(extra, surf_center)
 
     return workingdir
 
@@ -312,7 +312,7 @@ def capture() :
     global IS_SHOOTING, infos_frame
     # start shooting
     IS_SHOOTING = True
-    animTake.show(extra, surf_center)
+    #animTake.show(extra, surf_center)
     if outputdisplay is True :
         myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
     else :
@@ -327,7 +327,7 @@ def capture() :
     IS_SHOOTING = False
 
     infos_frame = defaultFont.render("Frame %s" %str(myCamera.frameCount).zfill(5), True, (255, 255, 255))
-    animTake.hide(extra, surf_center)
+    #animTake.hide(extra, surf_center)
 
 # GPIO FUNCTIONS
 def setupGpio():
@@ -361,14 +361,17 @@ def actionButtn(inputbttn):
             animLongPress.show(extra,surf_center)
         pass
     pressed_time=time.monotonic()-pressed_time
+    animLongPress.hide(extra, surf_center)
 
     if pressed_time >= constants.PRESSINGTIME :
         if inputbttn == constants.SHOT_BUTTON :
             SETUP = True
+            animSetup.show(extra, surf_center)
             newTake()
+            animSetup.hide(extra, surf_center)
         elif inputbttn == constants.PLAY_BUTTON :
+            animQuit.show(extra, surf_center)
             finish = True 
-        animLongPress.hide(extra, surf_center)
     else :
         if inputbttn == constants.SHOT_BUTTON :
             animTake.show(extra, surf_center)
