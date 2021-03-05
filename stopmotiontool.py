@@ -358,27 +358,27 @@ def actionButtn(inputbttn):
     while GPIO.input(inputbttn) == 0 :
         if time.monotonic()-pressed_time >= constants.PRESSINGTIME :
             CARTON = True
-            animLongPress.show(extra,surf_center)
+            animLongPress.show(extra,(0,0))
         pass
     pressed_time=time.monotonic()-pressed_time
-    animLongPress.hide(extra, surf_center)
+    animLongPress.hide(extra, (0,0)
 
     if pressed_time >= constants.PRESSINGTIME :
         CARTON = True
         if inputbttn == constants.SHOT_BUTTON :
             SETUP = True
-            animSetup.show(extra, surf_center)
+            animSetup.show(extra, (0,0)
             newTake()
             animSetup.hide(extra, surf_center)
         elif inputbttn == constants.PLAY_BUTTON :
-            animQuit.show(extra, surf_center)
+            animQuit.show(extra, (0,0)
             finish = True 
     else :
         if inputbttn == constants.SHOT_BUTTON :
             CARTON = True
-            animTake.show(extra, surf_center)
+            animTake.show(extra, (0,0)
             capture()
-            animTake.hide(extra, surf_center)
+            animTake.hide(extra, (0,0)
         elif inputbttn == constants.PLAY_BUTTON :
             CARTON = False
             IS_PLAYING = True
