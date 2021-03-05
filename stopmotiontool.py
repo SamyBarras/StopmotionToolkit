@@ -135,7 +135,7 @@ def newTake () :
     # called each time we start a new shot (takes)
     global frames, myCamera, takenum, take, workingdir, SETUP, infos_take
 
-    animSetup.show(screen, surf_center)
+    animSetup.show(extra, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
         logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
@@ -152,7 +152,7 @@ def newTake () :
     SETUP = False
 
     infos_take = defaultFont.render(workingdir, True, (255, 255, 255))
-    animSetup.hide(screen, surf_center)
+    animSetup.hide(extra, surf_center)
 
     return workingdir
 
@@ -312,7 +312,7 @@ def capture() :
     global IS_SHOOTING, infos_frame
     # start shooting
     IS_SHOOTING = True
-    animTake.show(screen, surf_center)
+    animTake.show(extra, surf_center)
     if outputdisplay is True :
         myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
     else :
@@ -327,7 +327,7 @@ def capture() :
     IS_SHOOTING = False
 
     infos_frame = defaultFont.render("Frame %s" %str(myCamera.frameCount).zfill(5), True, (255, 255, 255))
-    animTake.hide(screen, surf_center)
+    animTake.hide(extra, surf_center)
 
 # GPIO FUNCTIONS
 def setupGpio():
@@ -346,57 +346,19 @@ def setupGpio():
     logging.info("GPIO pins are ready ! ")
 
 def actionButtn(inputbttn):
-    global IS_PLAYING, IS_SHOOTING, finish, SETUP
+    global IS_PLAYING, IS_SHOOTING, finish, SETUP, CARTON
     '''
     function called each time a button is pressed
     will define to shot a frame / play anim / or get out of waiting screen
     --> need to recode this to allow combined buttons
     '''
     action = -1
-    # if inputbttn == constants.SHOT_BUTTON and GPIO.input(inputbttn) == 0 :
-    #     #start counting pressed time
-    #     pressed_time=time.monotonic()
-    #     while GPIO.input(inputbttn) == 0 :
-    #         pass
-    #     pressed_time=time.monotonic()-pressed_time
-    #     if pressed_time < constants.PRESSINGTIME :
-    #         logging.debug("short press -> capture")
-    #         #capture()
-    #         #return 1
-    #         action = 0
-    #     elif pressed_time >= constants.PRESSINGTIME :
-    #         logging.debug("long press --> new take")
-    #         #SETUP = True
-    #         #newTake()
-    #         action = 1 #return 0
-
-    # elif inputbttn == constants.PLAY_BUTTON and GPIO.input(inputbttn) == 0 :
-    #     #start counting pressed time
-    #     pressed_time=time.monotonic()
-    #     while GPIO.input(inputbttn) == 0 :
-    #         pass
-    #     pressed_time=time.monotonic()-pressed_time
-    #     if pressed_time < constants.PRESSINGTIME :
-    #         if outputdisplay is True :
-    #             #IS_PLAYING = True
-    #             logging.debug("play anim")
-    #             action = 2
-    #         else :
-    #             logging.debug("no display to show animation")
-    #             action = -1 #return 2
-    #     elif pressed_time >= constants.PRESSINGTIME :
-    #         logging.debug("long press --> shut down")
-    #         #finish = True
-    #         action = 3 #return 0
-    
-    # else :
-    #     action = -1 #return None # not needed, just for clarity
-    
     #start counting pressed time
     pressed_time=time.monotonic()
     while GPIO.input(inputbttn) == 0 :
         if time.monotonic()-pressed_time >= constants.PRESSINGTIME :
-            animLongPress.show(screen,surf_center)
+            CARTON = True
+            animLongPress.show(extra,surf_center)
         pass
     pressed_time=time.monotonic()-pressed_time
 
@@ -406,7 +368,7 @@ def actionButtn(inputbttn):
             newTake()
         elif inputbttn == constants.PLAY_BUTTON :
             finish = True 
-        animLongPress.hide(screen, surf_center)
+        animLongPress.hide(extra, surf_center)
     else :
         if inputbttn == constants.SHOT_BUTTON :
             capture()
@@ -435,6 +397,7 @@ if __name__== "__main__":
     IS_PLAYING = False
     IS_SHOOTING = False
     SETUP = True
+    CARTON = False
     SCREEN_SIZE = (0,0)
     screen = None
     workingdir = None
@@ -473,6 +436,7 @@ if __name__== "__main__":
             (w-preview.get_width())/2,
             (h-preview.get_height())/2
         )
+        extra = pygame.Surface(SCREEN_SIZE)
         # font and info elements
         pygame.font.init()
         defaultFont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
@@ -557,6 +521,8 @@ if __name__== "__main__":
                 screen.blit(infos_take,(25,25))
                 screen.blit(infos_frame,(25,50))
 
+            if CARTON is True :
+                screen.blit(extra, surf_center)
             #all_sprites.draw(screen)
             pygame.display.flip()
             prev_frame_time = new_frame_time
