@@ -19,6 +19,7 @@ class Animation(pygame.sprite.Sprite):
             self.m = None
     
     def update(self, trgt, cntr):
+        trgt.fill(0)
         trgt.blit(self.image, cntr)
         if self.m is not None :
             trgt.blit(self.m, (trgt.get_width()/2-self.m.get_rect().w/2,trgt.get_height()/2-self.m.get_rect().h/2))
