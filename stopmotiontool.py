@@ -293,8 +293,6 @@ def ledBlink ():
             time.sleep(0.1)
         elif IS_PLAYING is True :
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
-        elif LONG_PRESS is True :
-            GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
         elif SETUP is True :
             GPIO.output(constants.OUTPUT_LED,GPIO.LOW)
             time.sleep(0.3)
