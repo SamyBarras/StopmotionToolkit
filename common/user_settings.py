@@ -25,5 +25,6 @@ camIndex = 0
 # CAMERA CODEC
 # DEBUG / INFOS
 show_console = False
+show_infos = True
 # shutdown the computer @ end (only for raspberry pi)
 shutdown_rpi = True

@@ -133,7 +133,7 @@ def setupTakeDir(projectdir, _t):
 
 def newTake () :
     # called each time we start a new shot (takes)
-    global frames, myCamera, takenum, take, workingdir, SETUP
+    global frames, myCamera, takenum, take, workingdir, SETUP, infos_take
 
     animSetup.show(screen, surf_center)
     # export last take as movie file
@@ -150,7 +150,10 @@ def newTake () :
     # update takenum for next time
     takenum += 1
     SETUP = False
+
+    infos_take = defaultFont.render(workingdir, True, (255, 255, 255))
     animSetup.hide(screen, surf_center)
+
     return workingdir
 
 def getCameraDevice():
@@ -306,7 +309,7 @@ def ledBlink ():
             
 
 def capture() :
-    global IS_SHOOTING
+    global IS_SHOOTING, infos_frame
     # start shooting
     IS_SHOOTING = True
     animTake.show(screen, surf_center)
@@ -322,11 +325,13 @@ def capture() :
     # end of shooting
     pygame.time.delay(30)
     IS_SHOOTING = False
+
+    infos_frame = defaultFont.render("Frame %s" %str(myCamera.frameCount).zfill(5), True, (255, 255, 255))
     animTake.hide(screen, surf_center)
 
 # GPIO FUNCTIONS
 def setupGpio():
-    logging.info("==== etup GPIO =====")
+    logging.info("==== setup GPIO =====")
     GPIO.setmode(GPIO.BCM)
     # play button
     GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -435,6 +440,7 @@ if __name__== "__main__":
     workingdir = None
     takenum = 0
     take = None
+    infos_take = None
     # initialise pygame
     pygame.init()
     # setup
@@ -469,10 +475,10 @@ if __name__== "__main__":
         )
         # font and info elements
         pygame.font.init()
-        myfont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
-        infos_cam = myfont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
-        infos_fps = myfont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
+        defaultFont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
+        consoleFont = pygame.font.SysFont(pygame.font.get_default_font(), 20)
         pygame.display.set_caption('stopmotion project')
+
         # hide mouse
         pygame.mouse.set_visible(False)
         pygame.mouse.get_rel()
@@ -489,7 +495,11 @@ if __name__== "__main__":
     projectdir = setupProjectDir()
     # ==== new take =====
     workingdir = newTake ()
-
+    # update texts for console and infos
+    infos_take = defaultFont.render(workingdir, True, (255, 255, 255))
+    infos_frame = defaultFont.render("Frame %s" %str(myCamera.frameCount).zfill(5), True, (255, 255, 255))
+    infos_cam = consoleFont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
+    infos_fps = consoleFont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
     # ============ ready to animate
     logging.info("==== ready to animate :) =====")
     # main loop
@@ -532,20 +542,20 @@ if __name__== "__main__":
             else:
                 displayCameraStream(frameBuffer)
 
+            screen.fill((0,0,0))
+            screen.blit(preview, surf_center)
+
             if user_settings.show_console is True :
-                screen.blit(preview, surf_center) # console on top of preview ?
                 # calculate framerate
                 fps = 1/(new_frame_time-prev_frame_time) 
-                fpsconsole = myfont.render(str("%.2f" % fps), False, (250, 0, 0), (0,0,0))
-                screen.blit(infos_cam, (25,50))
-                screen.blit(infos_fps, (25,75))
-                screen.blit(fpsconsole, (25,90))
-            else :
-                screen.fill((0,0,0))
-                screen.blit(preview, surf_center)
+                fpsconsole = consoleFont.render(str("App fps -> %.2f" % fps), False, (250, 0, 0), (0,0,0))
+                screen.blit(infos_cam, (25, h-50))
+                screen.blit(infos_fps, (25, h-75))
+                screen.blit(fpsconsole, (25, h-100))
 
-            infos_take = myfont.render(workingdir, True, (250, 255, 255))
-            screen.blit(infos_take,(25,25))
+            if user_settings.show_infos is True :
+                screen.blit(infos_take,(25,25))
+                screen.blit(infos_frame,(25,50))
 
             #all_sprites.draw(screen)
             pygame.display.flip()

@@ -64,7 +64,7 @@ def rescaleImg(image, mult):
 def compileAnimation(wdir, frames, name): #channel
     # global HQFilesDir, workingdir
     HQFilesDir = os.path.join(wdir,"HQ")
-    command = "ffmpeg -framerate 12 -start_number 0 -i {}/{}_%05d.png -vcodec libx264 -pix_fmt yuv420p {}/{}_animation.mp4".format(HQFilesDir, name, wdir, name)
+    command = "ffmpeg -framerate 12 -f image2 -start_number 0 -i {}/{}_%05d.png -vcodec libx264 -pix_fmt yuv420p {}/{}_animation.mp4".format(HQFilesDir, name, wdir, name)
     if (len(frames) > 1) :
         logging.info("Compiling frames as videofile...")
         subprocess.call(command, shell=True)
