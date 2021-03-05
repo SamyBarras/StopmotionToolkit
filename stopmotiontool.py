@@ -405,7 +405,7 @@ def actionButtn(inputbttn):
             SETUP = True
             newTake()
         elif inputbttn == constants.PLAY_BUTTON :
-            finish = True
+            finish = True 
         animLongPress.hide(screen, surf_center)
     else :
         if inputbttn == constants.SHOT_BUTTON :

@@ -27,4 +27,4 @@ camIndex = 0
 show_console = False
 show_infos = True
 # shutdown the computer @ end (only for raspberry pi)
-shutdown_rpi = True
+shutdown_rpi = False
