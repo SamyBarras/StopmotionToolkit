@@ -371,7 +371,9 @@ def actionButtn(inputbttn):
         animLongPress.hide(extra, surf_center)
     else :
         if inputbttn == constants.SHOT_BUTTON :
+            animTake.show(extra, surf_center)
             capture()
+            animTake.hide(extra, surf_center)
         elif inputbttn == constants.PLAY_BUTTON :
             IS_PLAYING = True
     
@@ -448,9 +450,10 @@ if __name__== "__main__":
         pygame.mouse.get_rel()
 
         # ==== sprites ======
-        animTake = animation.Animation(SCREEN_SIZE, (255,0,0), 128) # size, color, alpha
-        animSetup = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "new take !") # size, color, alpha
-        animLongPress = animation.Animation(SCREEN_SIZE, (0,0,0), 170)
+        animTake = animation.Animation(SCREEN_SIZE, (255,0,0), 128, "") # size, color, alpha
+        animSetup = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "building new take !") # size, color, alpha
+        animQuit = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "quitting app !") # size, color, alpha
+        animLongPress = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "")
 
     else :
         logging.warning("Stopmotion tool run in headless mode !")
