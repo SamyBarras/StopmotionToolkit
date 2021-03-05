@@ -364,6 +364,7 @@ def actionButtn(inputbttn):
     animLongPress.hide(extra, surf_center)
 
     if pressed_time >= constants.PRESSINGTIME :
+        CARTON = True
         if inputbttn == constants.SHOT_BUTTON :
             SETUP = True
             animSetup.show(extra, surf_center)
@@ -374,12 +375,14 @@ def actionButtn(inputbttn):
             finish = True 
     else :
         if inputbttn == constants.SHOT_BUTTON :
+            CARTON = True
             animTake.show(extra, surf_center)
             capture()
             animTake.hide(extra, surf_center)
         elif inputbttn == constants.PLAY_BUTTON :
+            CARTON = False
             IS_PLAYING = True
-    
+    CARTON = False
     return action
 
 
@@ -527,8 +530,8 @@ if __name__== "__main__":
                 screen.blit(infos_take,(25,25))
                 screen.blit(infos_frame,(25,50))
 
-            #if CARTON is True :
-            screen.blit(extra, surf_center)
+            if CARTON is True :
+                screen.blit(extra, surf_center)
             #all_sprites.draw(screen)
             pygame.display.flip()
             prev_frame_time = new_frame_time
