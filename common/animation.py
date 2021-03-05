@@ -22,7 +22,7 @@ class Animation(pygame.sprite.Sprite):
         trgt.blit(self.image, cntr)
         if self.m is not None :
             trgt.blit(self.m, (trgt.get_width()/2-self.m.get_rect().w/2,trgt.get_height()/2-self.m.get_rect().h/2))
-        pygame.display.flip()
+        #pygame.display.flip()
         
     def show(self, trgt, cntr) :
         self.image.set_alpha(self.default_alpha)
