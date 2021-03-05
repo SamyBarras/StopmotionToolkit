@@ -134,7 +134,7 @@ def setupTakeDir(projectdir, _t):
 def newTake () :
     # called each time we start a new shot (takes)
     global frames, myCamera, takenum, take, workingdir, SETUP, infos_take
-
+    SETUP = True
     #animSetup.show(extra, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
@@ -368,25 +368,22 @@ def actionButtn(inputbttn):
     pressed_time=time.monotonic()-pressed_time
 
     if pressed_time >= constants.PRESSINGTIME :
-        CARTON = True
         if inputbttn == constants.SHOT_BUTTON :
-            SETUP = True
-            #animSetup.show(extra, (0,0))
             newTake()
-            #animSetup.hide(extra, surf_center)
+            animSetup.hide(extra, (0,0))
         elif inputbttn == constants.PLAY_BUTTON :
-            #animQuit.show(extra, (0,0))
-            finish = True 
+            finish = True
+            animQuit.hide(extra, (0,0))
+        CARTON = False
     else :
         if inputbttn == constants.SHOT_BUTTON :
             CARTON = True
             animTake.show(extra, (0,0))
             capture()
             animTake.hide(extra, (0,0))
-        elif inputbttn == constants.PLAY_BUTTON :
             CARTON = False
+        elif inputbttn == constants.PLAY_BUTTON :
             IS_PLAYING = True
-    CARTON = False
     return action
 
 
