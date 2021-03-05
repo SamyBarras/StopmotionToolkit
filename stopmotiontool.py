@@ -361,24 +361,24 @@ def actionButtn(inputbttn):
             animLongPress.show(extra,(0,0))
         pass
     pressed_time=time.monotonic()-pressed_time
-    animLongPress.hide(extra, (0,0)
+    animLongPress.hide(extra, (0,0))
 
     if pressed_time >= constants.PRESSINGTIME :
         CARTON = True
         if inputbttn == constants.SHOT_BUTTON :
             SETUP = True
-            animSetup.show(extra, (0,0)
+            animSetup.show(extra, (0,0))
             newTake()
             animSetup.hide(extra, surf_center)
         elif inputbttn == constants.PLAY_BUTTON :
-            animQuit.show(extra, (0,0)
+            animQuit.show(extra, (0,0))
             finish = True 
     else :
         if inputbttn == constants.SHOT_BUTTON :
             CARTON = True
-            animTake.show(extra, (0,0)
+            animTake.show(extra, (0,0))
             capture()
-            animTake.hide(extra, (0,0)
+            animTake.hide(extra, (0,0))
         elif inputbttn == constants.PLAY_BUTTON :
             CARTON = False
             IS_PLAYING = True
