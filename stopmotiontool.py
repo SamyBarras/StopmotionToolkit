@@ -527,8 +527,8 @@ if __name__== "__main__":
                 screen.blit(infos_take,(25,25))
                 screen.blit(infos_frame,(25,50))
 
-            if CARTON is True :
-                screen.blit(extra, surf_center)
+            #if CARTON is True :
+            screen.blit(extra, surf_center)
             #all_sprites.draw(screen)
             pygame.display.flip()
             prev_frame_time = new_frame_time
