@@ -47,7 +47,7 @@ hdmi_group=2:0
 hdmi_mode=82:0
 ```
 
-### Launch app at startup
+### Launch app at startup (optional)
 Now we can setup autostart file](https://www.digikey.com/en/maker/projects/how-to-run-a-raspberry-pi-program-on-startup/cc16cb41a3d447b8aaacf1da14368b13), so our app will launch at startup.
 
 ``` bash

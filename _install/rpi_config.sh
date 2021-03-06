@@ -11,5 +11,8 @@ sudo rm splash.png
 sudo wget https://maudetsamy.com/_images/splash.png
 sudo sed -i 's/pix/mamatus/g; s/Raspberry Pi/My/g' mamatus.plymouth
 sudo sed -i 's/pix/mamatus/g' /etc/plymouth/plymouthd.conf
-
+echo "===== change Desktop image and color"
+cd /usr/share/plymouth/themes/mamatus
+sudo wget https://maudetsamy.com/_images/mamatus_logo.jpg
+pcmanfm --wallpaper-mode=center --set-wallpaper /usr/share/plymouth/themes/mamatus/mamatus_logo.jpg
 
