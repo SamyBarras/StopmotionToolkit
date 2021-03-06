@@ -4,7 +4,7 @@ echo "===== RPI CONFIGURATION ====="
 echo "===== temp copy"
 cp ./_images_/splash.png /home/pi/Desktop/splash.png
 echo "===== change Desktop image and color"
-sudo mv desktop-items-0.conf /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+sudo cp desktop-items-0.conf /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
 echo "===== change RPI splash screen"
 cd /usr/share/plymouth/themes
 sudo cp -a pix mamatus
