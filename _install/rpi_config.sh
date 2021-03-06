@@ -13,6 +13,6 @@ sudo sed -i 's/pix/mamatus/g; s/Raspberry Pi/My/g' mamatus.plymouth
 sudo sed -i 's/pix/mamatus/g' /etc/plymouth/plymouthd.conf
 echo "===== change Desktop image and color"
 cd /home/pi/Pictures
-sudo wget -N https://maudetsamy.com/_images/mamatus_logo.jpg
+sudo wget -N http://maudetsamy.com/mamatus/_images/mamatus_logo.jpg
 pcmanfm --wallpaper-mode=center --set-wallpaper /home/pi/Pictures/mamatus_logo.jpg
 
