@@ -2,7 +2,7 @@
 # launched from ".../stopmotiontool/_install/" directory
 echo "===== RPI CONFIGURATION ====="
 echo "===== temp copy"
-cd ../common/
+cd ././common/
 cp splash.png /home/pi/Desktop/splash.png
 echo "===== change Desktop image and color"
 sudo pcmanfm --set-wallpaper mamatus_logo.jpg --wallpaper-mode=center
