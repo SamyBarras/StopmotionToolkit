@@ -16,5 +16,6 @@ sudo mv /home/pi/Desktop/splash.png /usr/share/plymouth/themes/mamatus
 #sudo wget https://maudetsamy.com/_images/splash.png
 sudo sed -i 's/pix/mamatus/g; s/Raspberry Pi/My/g' mamatus.plymouth
 sudo sed -i 's/pix/mamatus/g' /etc/plymouth/plymouthd.conf
+sudo reboot
 
 
