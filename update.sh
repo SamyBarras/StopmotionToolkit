@@ -2,4 +2,4 @@
 #git fetch origin
 #git reset --hard origin/main
 
-git pull http://github.com/samybarras/stopmotiontool
+git pull https://github.com/samybarras/stopmotiontool
