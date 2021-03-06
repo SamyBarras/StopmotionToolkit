@@ -4,8 +4,8 @@ echo "===== RPI CONFIGURATION ====="
 echo "===== temp copy"
 cp ./_images_/splash.png /home/pi/Desktop/splash.png
 echo "===== change Desktop image and color"
-DISPLAY=:0.0
-sudo pcmanfm --set-wallpaper _images_/mamatus_logo.jpg --wallpaper-mode=center
+export DISPLAY=:0
+sudo pcmanfm --set-wallpaper ./_images_/mamatus_logo.jpg --wallpaper-mode=center
 echo "===== change RPI splash screen"
 cd /usr/share/plymouth/themes
 sudo cp -a pix mamatus
