@@ -25,7 +25,7 @@ bash install.sh
 ### Silent boot
 This should modify the RPI splash screen to Mamatus logo :
 ``` bash
-cd /stopmotiontool/install/
+cd /stopmotiontool/_install/
 bash rpi_config.sh
 ```
 Documentation :
