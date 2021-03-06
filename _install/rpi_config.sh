@@ -5,6 +5,7 @@ echo "===== temp copy"
 cp ./_images_/splash.png /home/pi/Desktop/splash.png
 echo "===== change Desktop image and color"
 export DISPLAY=:0
+export XDG_RUNTIME_DIR=/run/user/1000
 sudo pcmanfm --set-wallpaper ./_images_/mamatus_logo.jpg --wallpaper-mode=center
 echo "===== change RPI splash screen"
 cd /usr/share/plymouth/themes
