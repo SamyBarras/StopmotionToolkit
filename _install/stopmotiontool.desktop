@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=StopmotionTool
+Exec=python3 /home/pi/Documents/stopmotiontool/stopmotiontool.py
+Icon=/home/pi/Documents/stopmotiontool/common/icon.png
+StartupNotify=True
+Terminal=False

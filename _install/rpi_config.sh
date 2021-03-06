@@ -14,5 +14,5 @@ sudo sed -i 's/pix/mamatus/g' /etc/plymouth/plymouthd.conf
 echo "===== change Desktop image and color"
 cd /home/pi/Pictures
 sudo wget -N http://maudetsamy.com/mamatus/_images/mamatus_logo.jpg
-pcmanfm --wallpaper-mode=center --set-wallpaper /home/pi/Pictures/mamatus_logo.jpg
+sudo pcmanfm --set-wallpaper /home/pi/Pictures/mamatus_logo.jpg --wallpaper-mode=center
 

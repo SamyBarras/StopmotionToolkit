@@ -21,6 +21,10 @@ echo "=========== install xterm for auto-load in console startX"
 sudo apt-get install -y xterm -y
 sudo apt-get autoclean
 
+echo "=========== Create Desktop shortcut"
+cp icon.png /home/pi/Pictures/icon.png
+cp stopmotiontool.desktop /home/pi/Desktop/stopmotiontool.desktop
+
 echo "=========== install python requirements"
 cd ../
 pip3 install -r requirements.txt
