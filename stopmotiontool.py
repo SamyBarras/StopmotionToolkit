@@ -444,7 +444,7 @@ if __name__== "__main__":
         SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
         mylog.info("Window size : %s", SCREEN_SIZE)
         preview = pygame.Surface(SCREEN_SIZE)
-        screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
+        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
         modes = pygame.display.list_modes()
         FULLSCREEN = False
         surf_center = (
@@ -552,7 +552,7 @@ if __name__== "__main__":
                 temp_surface.fill((0,0,0,50))
                 temp_surface.blit(infos_take,(0,0))
                 screen.blit(temp_surface, (screen.get_width()-infos_take.get_size()[0]-20,20))
-                
+
             if CARTON is True :
                 screen.blit(extra, surf_center)
             #all_sprites.draw(screen)
