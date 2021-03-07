@@ -486,9 +486,7 @@ if __name__== "__main__":
         # do not allow screenSurface saver
         pygame.display.set_allow_screensaver(False)
 
-        #
-        if ostype == 0 :
-            subprocess.call("v4l2ucp") #we launch additional app to control webcam
+        
 
     else :
         mylog.warning("Stopmotion tool run in headless mode !")
