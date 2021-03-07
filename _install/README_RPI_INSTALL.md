@@ -10,7 +10,7 @@
 Clone project's repo from GitHub :
 
 ``` bash
-cd /
+cd /home/pi/Documents/
 sudo git clone https://github.com/samybarras/stopmotiontool
 ```
 
@@ -23,7 +23,7 @@ bash install.sh
 ## Modify RPi config
 
 ### Silent boot
-This should modify the RPI splash screen to Mamatus logo :
+This should modify the RPI splash screen to Mamatus logo and add logo to desktop :
 ``` bash
 cd /stopmotiontool/_install/
 bash rpi_config.sh

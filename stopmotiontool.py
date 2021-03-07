@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # customs imports
-import sys, os, time, collections, re, datetime, subprocess, logging
+import sys, os, time, collections, re, datetime, subprocess
+import log, logging
+from colorlog import ColoredFormatter
 # dependencies
 import pygame
 import pygame.camera
@@ -12,34 +14,23 @@ from threading import Thread, Timer
 # custom imports
 from common import *
 
-# logging     https://stackoverflow.com/questions/14844970/modifying-logging-message-format-based-on-message-logging-level-in-python3
-class MyFormatter(logging.Formatter):
-    def format(self, record):
-        if record.levelno == logging.DEBUG:
-            self._style._fmt = "%(message)s"
-        else:
-            color = {
-                logging.WARNING: 33,
-                logging.ERROR: 31,
-                logging.FATAL: 31,
-                logging.DEBUG: 36
-            }.get(record.levelno, 0)   
-            self._style._fmt = f"[{color}m%(levelname)s\033[0m: %(message)s"
-        return super().format(record)
-
-#logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger()
-handler = logging.StreamHandler(sys.stdout) # maybe duplicate with FileHandler ?
-logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log') # this will create an error if launched on WINDOWS OS
-handler = logging.FileHandler(filename=logFile, mode='w', encoding='utf-8')
-handler.setFormatter(MyFormatter())#MyFormatter()
-logger.setLevel(logging.INFO)
-logger.addHandler(handler)
+# logging setup
+mylog = logging.getLogger('pythonConfig')
+mylog.setLevel(log.LOG_LEVEL)
+logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log')
+# append to log file if same day, or start from clean file
+if not os.path.exists(logFile) or log.is_file_older_than_x_days(logFile) :
+    fh = logging.FileHandler(logFile, mode='w')
+else :
+    fh = logging.FileHandler(logFile, mode='a')
+fh.setLevel(logging.INFO)
+fh.setFormatter(log.CustomFormatter())
+mylog.addHandler(fh)
 
 def detectOS ():
     ostype = None
     #print(sys.platform) alternative, will output : linux / darwin (osx) / win
-    logging.debug("os : %s - %s ", os.uname()[1], os.uname()[4])
+    mylog.debug("os : %s - %s ", os.uname()[1], os.uname()[4])
     if (os.uname()[4].startswith("arm")) : # rpi
         ostype = 0
     elif (os.uname()[4].startswith("x86_64")) : # osx
@@ -47,7 +38,7 @@ def detectOS ():
     else :
         ostype = 2
         # throw error --> can't run on this machine (OS issue)
-        logging.critical("OS not recognized -- please play with Rpi or OSX !")
+        mylog.critical("OS not recognized -- please play with Rpi or OSX !")
         sys.exit(2)
     return ostype
 
@@ -55,7 +46,7 @@ def setupProjectDir():
     '''
         This way of checking external drives needs startX to work
     '''
-    logging.info("==== setup project dir =====")
+    mylog.info("==== setup project dir =====")
     partitions = psutil.disk_partitions()
     drivesize = 0
     regEx = '\A' + constants.drives[ostype]
@@ -70,10 +61,10 @@ def setupProjectDir():
         if tmp is not None and  psize > drivesize:
             drivepath = p.mountpoint
             drivesize = psize
-            logging.debug("External drive found -> %s -> %s", drivepath, drivesize)
+            mylog.debug("External drive found -> %s -> %s", drivepath, drivesize)
             found = True
     if found is False :
-        logging.warning("External drive not found ! Project will be stored in Desktop...")
+        mylog.warning("External drive not found ! Project will be stored in Desktop...")
         if ostype == 2 :
             # windows
             drivepath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
@@ -81,7 +72,7 @@ def setupProjectDir():
             # 0 and 1 are OSX and Linux systems
             drivepath = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
     else :
-        logging.debug(drivepath)
+        mylog.debug(drivepath)
 
     if not user_settings.PROJECT_NAME : # project_name custom paramater is not set... we use time to make unik name
         dirname = datetime.datetime.now().strftime('%Y%m%d') #_%H%M%S')
@@ -94,7 +85,7 @@ def setupProjectDir():
     return projectdir
 
 def setupTakeDir(projectdir, _t):
-    logging.info("==== setup working dir =====")
+    mylog.info("==== setup working dir =====")
 
     if not os.path.exists(projectdir):
         takeDir = user_settings.TAKE_NAME + "_" + str(_t).zfill(2)
@@ -124,11 +115,11 @@ def setupTakeDir(projectdir, _t):
     
     # last checks before continuing
     if os.path.exists(workingdir) and os.path.exists(HQFilesDir):
-        logging.info("Working directory : %s", workingdir)
+        mylog.info("Working directory : %s", workingdir)
         return workingdir, _t
     else :
         # throw error --> can't setup working dir
-        logging.error("error while creating working dir")
+        mylog.error("error while creating working dir")
         quit()
 
 def newTake () :
@@ -138,7 +129,7 @@ def newTake () :
     #animSetup.show(extra, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
-        logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
+        mylog.info("Export of take \"%s\" as movie file using ffmpeg...", take)
         image_processing.compileAnimation(workingdir, frames, take)
     # setup take and new dir
     workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
@@ -159,7 +150,7 @@ def newTake () :
 def getCameraDevice():
     res_w = 0
     arr = []
-    logging.info("==== setup camera =====")
+    mylog.info("==== setup camera =====")
     if user_settings.forceCamera is True :
         # camera to use is defined by user settings
         cap = cam.streamConstructor (camIndex, ostype, user_settings.camera_codec)
@@ -168,7 +159,7 @@ def getCameraDevice():
             cap.release()
             return arr
         else :
-            logging.error("Camera not found !")
+            mylog.error("Camera not found !")
             quit()
     else :
         id = -1
@@ -178,7 +169,7 @@ def getCameraDevice():
             try :
                 cap = cam.streamConstructor (i, ostype, constants.codecs[ostype])
             except :
-                logging.error("Unexpected error:")
+                mylog.error("Unexpected error:")
                 break
             else :    
                 if cap.read()[0]:
@@ -186,7 +177,7 @@ def getCameraDevice():
                     tmp_h = cap.get(4)
                     cap.release()
                     tmp_cam = [i,tmp_w, tmp_h]
-                    logging.debug("cam %s -> (%s,%s)",i, tmp_w, tmp_h)
+                    mylog.debug("cam %s -> (%s,%s)",i, tmp_w, tmp_h)
                     if tmp_w > res_w :
                         res_w = tmp_w
                         arr = tmp_cam
@@ -194,28 +185,28 @@ def getCameraDevice():
 
         if id == -1 :
             # throw error here --> no camera found
-            logging.error("Camera not found at all !")
+            mylog.error("Camera not found at all !")
             quit()
         else :
-            logging.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
+            mylog.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
 
         return arr
 
 
 def getMonitor ():
-    logging.info("==== setup output display =====")
+    mylog.info("==== setup output display =====")
     if ostype == 0 :
         #raspberry pi
         drivers = ('directfb', 'fbcon', 'svgalib')
         found = False
         for driver in drivers:
-            logging.debug("Trying \'%s\'", driver)
+            mylog.debug("Trying \'%s\'", driver)
             if not os.getenv('SDL_VIDEODRIVER'):
                 os.putenv('SDL_VIDEODRIVER', driver)
             try:
                 pygame.display.init()
             except pygame.error:
-                logging.debug('%s -> failed', driver)
+                mylog.debug('%s -> failed', driver)
                 continue
             else :
                 found = True
@@ -224,10 +215,10 @@ def getMonitor ():
             #raise Exception('No suitable video driver found.')
             return False, 0, 0
         else :
-            logging.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
+            mylog.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
             return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
-        logging.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
+        mylog.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
 
 
@@ -321,7 +312,7 @@ def capture() :
     if myCamera.lastframe is not None :
         frames.append(myCamera.lastframe)
     else :
-        logging.error("Error while shooting : last frame is empty !")
+        mylog.error("Error while shooting : last frame is empty !")
     # end of shooting
     pygame.time.delay(30)
     IS_SHOOTING = False
@@ -331,7 +322,7 @@ def capture() :
 
 # GPIO FUNCTIONS
 def setupGpio():
-    logging.info("==== setup GPIO =====")
+    mylog.info("==== setup GPIO =====")
     GPIO.setmode(GPIO.BCM)
     # play button
     GPIO.setup(constants.PLAY_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -343,7 +334,7 @@ def setupGpio():
     GPIO.add_event_callback(constants.SHOT_BUTTON,actionButtn)
     # led
     GPIO.setup(constants.OUTPUT_LED, GPIO.OUT) # SHOT_LED
-    logging.info("GPIO pins are ready ! ")
+    mylog.info("GPIO pins are ready ! ")
 
 def actionButtn(inputbttn):
     global IS_PLAYING, IS_SHOOTING, finish, SETUP, CARTON
@@ -393,7 +384,7 @@ def quit():
         GPIO.cleanup()
     # export animation before quitting totally
     if user_settings.EXPORT_ANIM is True and frames is not None :
-        logging.info("Export of take \"%s\" as movie file using ffmpeg...", take)
+        mylog.info("Export of take \"%s\" as movie file using ffmpeg...", take)
         image_processing.compileAnimation(workingdir, frames, take)
     print("Goodbye Animator !")
     sys.exit()
@@ -401,6 +392,9 @@ def quit():
 
 
 if __name__== "__main__":
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    mylog.debug(dir_path)
     # global var setup
     frames = None # framebuffer for animation
     IS_PLAYING = False
@@ -438,12 +432,16 @@ if __name__== "__main__":
     # not in headless mode
     if outputdisplay is True:
         SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
-        logging.info("Window size : %s", SCREEN_SIZE)
+        mylog.info("Window size : %s", SCREEN_SIZE)
         preview = pygame.Surface(SCREEN_SIZE)
-        screen = pygame.display.set_mode((w,h), pygame.FULLSCREEN) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
+        screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
         surf_center = (
             (w-preview.get_width())/2,
             (h-preview.get_height())/2
+        )
+        surf_center = (
+            (screen.get_width()-preview.get_width())/2,
+            (screen.get_height()-preview.get_height())/2
         )
         extra = pygame.Surface(SCREEN_SIZE)
         # font and info elements
@@ -463,7 +461,7 @@ if __name__== "__main__":
         animLongPress = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "")
 
     else :
-        logging.warning("Stopmotion tool run in headless mode !")
+        mylog.warning("Stopmotion tool run in headless mode !")
     
     # ==== new project ====
     projectdir = setupProjectDir()
@@ -475,7 +473,7 @@ if __name__== "__main__":
     infos_cam = consoleFont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
     infos_fps = consoleFont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
     # ============ ready to animate
-    logging.info("==== ready to animate :) =====")
+    mylog.info("==== ready to animate :) =====")
     # main loop
     finish = False
     prev_frame_time = time.time()
@@ -523,13 +521,21 @@ if __name__== "__main__":
                 # calculate framerate
                 fps = 1/(new_frame_time-prev_frame_time) 
                 fpsconsole = consoleFont.render(str("App fps -> %.2f" % fps), False, (250, 0, 0), (0,0,0))
-                screen.blit(infos_cam, (25, h-50))
-                screen.blit(infos_fps, (25, h-75))
-                screen.blit(fpsconsole, (25, h-100))
+                screen.blit(infos_cam, (25, screen.get_height()-50))
+                screen.blit(infos_fps, (25, screen.get_height()-75))
+                screen.blit(fpsconsole, (25, screen.get_height()-100))
 
             if user_settings.show_infos is True :
-                screen.blit(infos_take,(25,25))
-                screen.blit(infos_frame,(25,50))
+                temp_surface = pygame.Surface(infos_take.get_size(),SRCALPHA)
+                temp_surface.fill((0,0,0,50))
+                temp_surface.blit(infos_take,(0,0))
+                screen.blit(temp_surface, (25,25))
+
+                temp_surface = pygame.Surface(infos_frame.get_size(),SRCALPHA)
+                temp_surface.fill((0,0,0,50))
+                temp_surface.blit(infos_frame,(0,0))
+                screen.blit(temp_surface, (25,50))
+
 
             if CARTON is True :
                 screen.blit(extra, surf_center)
