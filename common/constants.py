@@ -6,4 +6,4 @@ PRESSINGTIME = 4
 # OS specific variables
 # [rpi,osx,windows]
 drives = ["/media/pi","/Volumes",""]
-codecs = ['H264','H264']
+codecs = ['MJPG','H264']
