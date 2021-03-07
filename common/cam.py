@@ -102,7 +102,7 @@ def streamConstructor (id, os=0, codec='MJPG', w=1920, h=1080, fps=30):
             cap.set(cv2.CAP_PROP_SETTINGS,0) # will show camera settings on WINDOWS OS
         
     # setup
-    #cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*codec))
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*codec))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, w)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
     cap.set(cv2.CAP_PROP_FPS, fps)
