@@ -16,6 +16,15 @@ sudo mv /home/pi/Desktop/splash.png /usr/share/plymouth/themes/mamatus
 #sudo wget https://maudetsamy.com/_images/splash.png
 sudo sed -i 's/pix/mamatus/g; s/Raspberry Pi/My/g' mamatus.plymouth
 sudo sed -i 's/pix/mamatus/g' /etc/plymouth/plymouthd.conf
+echo "Press any key to continue"
+while [ true ] ; do
+read -t 3 -n 1
+if [ $? = 0 ] ; then
+exit ;
+else
+echo "waiting for the keypress"
+fi
+done
 sudo reboot
 
 

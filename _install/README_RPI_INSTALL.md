@@ -16,7 +16,7 @@ sudo git clone https://github.com/samybarras/stopmotiontool
 
 When project is downloaded, we can continue the installation :
 ``` bash
-cd /stopmotiontool/_install/
+cd stopmotiontool/_install/
 bash install.sh
 ```
 
