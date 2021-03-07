@@ -457,7 +457,8 @@ if __name__== "__main__":
         PREVIEW_SIZE = definePreviewSize(myCamera.size, WINDOWED_SIZE)
         mylog.info("Preview size : %s, %s" %(PREVIEW_SIZE[0], PREVIEW_SIZE[1]))
         preview = pygame.Surface(PREVIEW_SIZE)
-        screen = pygame.display.set_mode(WINDOWED_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
+        screen = pygame.display.set_mode(WINDOWED_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN
+        pygame.display.set_allow_screensaver(False)
         modes = pygame.display.list_modes()
         surf_center = (
             (screen.get_width()-preview.get_width())/2,
@@ -518,8 +519,6 @@ if __name__== "__main__":
                         SETUP = True
                         newTake()
                     if event.key == K_f and outputdisplay is True :
-                        pygame.display.quit()
-                        pygame.display.init()
                         if not FULLSCREEN:
                             screen = pygame.display.set_mode(DISPLAY_SIZE, pygame.FULLSCREEN)#modes[0]
                         else:
