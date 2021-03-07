@@ -529,10 +529,6 @@ if __name__== "__main__":
                         # recalc surf center 
                         #PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
                         FULLSCREEN = not FULLSCREEN
-                        surf_center = (
-                            (screenSurface.get_width()-PREVIEW_SIZE[0])/2,
-                            (screenSurface.get_height()-PREVIEW_SIZE[1])/2
-                        )
                         pygame.display.flip()
                     if event.key == K_b and outputdisplay is True :
                         wb = not wb
@@ -544,7 +540,11 @@ if __name__== "__main__":
                         myCamera.release()
                         quit()
                         finish = True
-
+            #
+            surf_center = (
+                (screenSurface.get_width()-PREVIEW_SIZE[0])/2,
+                (screenSurface.get_height()-PREVIEW_SIZE[1])/2
+            )
             # switch between animation previewSurface and onion skin view
             if IS_PLAYING is True :
                 displayAnimation()
