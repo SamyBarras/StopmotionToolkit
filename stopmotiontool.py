@@ -229,6 +229,7 @@ def defineWindowedSize(displaysize) :
     return (_w, _h)
 
 def definePreviewSize(camsize, displaysize):
+    global WINDOWED_SIZE
     ix, iy = (camsize[0], camsize[1])
     bx, by = (displaysize[0], displaysize[1])
     if ix > iy:
@@ -251,6 +252,9 @@ def definePreviewSize(camsize, displaysize):
             sy = scale_factor * iy
         else:
             sy = by
+    
+    if sx >= ix :
+        sx, sy = definePreviewSize(camsize,WINDOWED_SIZE)
 
     return (int(sx),int(sy))
 
