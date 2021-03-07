@@ -446,6 +446,8 @@ if __name__== "__main__":
     video_device = getCameraDevice()    # array [camera_id, width, height]
     myCamera = cam.cam(video_device, ostype, constants.codecs[ostype]) # video_device, os, codec, buffer
     myCamera.start() # threaded    
+    if os == 0 :
+        subprocess.call("v4l2ucp") #we launch additional app to control webcam
 
     # ============ output display
     outputdisplay, w, h = getMonitor () # boolean, width, height
