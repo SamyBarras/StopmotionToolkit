@@ -23,7 +23,7 @@ bash install.sh
 ## Modify RPi config
 
 ### Silent boot
-This should modify the RPI splash screen to Mamatus logo and add logo to desktop :
+This should modify the RPI splash screenSurface to Mamatus logo and add logo to desktop :
 ``` bash
 cd /stopmotiontool/_install/
 bash rpi_config.sh

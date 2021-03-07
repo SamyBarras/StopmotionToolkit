@@ -126,7 +126,7 @@ def newTake () :
     # called each time we start a new shot (takes)
     global frames, myCamera, takenum, take, workingdir, SETUP, infos_take
     SETUP = True
-    #animSetup.show(extra, surf_center)
+    #animSetup.show(extraSurface, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
         mylog.info("Export of take \"%s\" as movie file using ffmpeg..." %take)
@@ -143,7 +143,7 @@ def newTake () :
     SETUP = False
 
     infos_take = defaultFont.render(workingdir, True, (255, 255, 255))
-    #animSetup.hide(extra, surf_center)
+    #animSetup.hide(extraSurface, surf_center)
 
     return workingdir
 
@@ -222,7 +222,7 @@ def getMonitor ():
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
 
 def defineWindowedSize(displaysize) :
-    scale_factor = 0.65 #in windowed mode, the window will be twice smaller than the screen
+    scale_factor = 0.65 #in windowed mode, the window will be twice smaller than the screenSurface
     _w = int(displaysize[0]*scale_factor)
     _h = int(displaysize[1]*scale_factor)
     mylog.debug("windowed size = %s , %s" %(_w, _h))
@@ -262,7 +262,7 @@ def displayAnimation():
     global IS_PLAYING
     while IS_PLAYING :
         for i in frames : # frames is pygame.surface array           
-            screen.blit(i, surf_center)
+            screenSurface.blit(i, surf_center)
             pygame.display.flip()
             time.sleep(1/user_settings.FPS) # to keep framerate 
         IS_PLAYING=False
@@ -278,7 +278,7 @@ def displayCameraStream(buffer):
             img = buffer
 
         img = image_processing.rescaleToDisplay(img, PREVIEW_SIZE)
-        preview.blit(img, (0,0))
+        previewSurface.blit(img, (0,0))
 
     # display onion skin
     if user_settings.ONIONSKIN >= 1 :
@@ -290,7 +290,7 @@ def displayCameraStream(buffer):
                 frame = frames[-f] # frames is pygame.surface array
                 img = frame.copy()
                 img.set_alpha(alpha)
-                preview.blit(img, (0,0))
+                previewSurface.blit(img, (0,0))
             else :
                 pass
             f -= 1
@@ -322,7 +322,7 @@ def capture() :
     global IS_SHOOTING, infos_frame
     # start shooting
     IS_SHOOTING = True
-    #animTake.show(extra, surf_center)
+    #animTake.show(extraSurface, surf_center)
     if outputdisplay is True :
         myCamera.capturedisp(PREVIEW_SIZE, workingdir, take)
     else :
@@ -337,7 +337,7 @@ def capture() :
     IS_SHOOTING = False
 
     infos_frame = defaultFont.render("Frame %s" %str(myCamera.frameCount).zfill(5), True, (255, 255, 255))
-    #animTake.hide(extra, surf_center)
+    #animTake.hide(extraSurface, surf_center)
 
 # GPIO FUNCTIONS
 def setupGpio():
@@ -359,7 +359,7 @@ def actionButtn(inputbttn):
     global IS_PLAYING, IS_SHOOTING, finish, SETUP, CARTON
     '''
     function called each time a button is pressed
-    will define to shot a frame / play anim / or get out of waiting screen
+    will define to shot a frame / play anim / or get out of waiting screenSurface
     --> need to recode this to allow combined buttons
     '''
     action = -1
@@ -369,9 +369,9 @@ def actionButtn(inputbttn):
         if time.monotonic()-pressed_time >= constants.PRESSINGTIME :
             CARTON = True
             if inputbttn == constants.SHOT_BUTTON :
-                animSetup.show(extra, (0,0))
+                animSetup.show(extraSurface, (0,0))
             elif inputbttn == constants.PLAY_BUTTON :
-                animQuit.show(extra, (0,0))
+                animQuit.show(extraSurface, (0,0))
             else :
                 pass
         pass
@@ -380,17 +380,17 @@ def actionButtn(inputbttn):
     if pressed_time >= constants.PRESSINGTIME :
         if inputbttn == constants.SHOT_BUTTON :
             newTake()
-            animSetup.hide(extra, (0,0))
+            animSetup.hide(extraSurface, (0,0))
         elif inputbttn == constants.PLAY_BUTTON :
             finish = True
-            animQuit.hide(extra, (0,0))
+            animQuit.hide(extraSurface, (0,0))
         CARTON = False
     else :
         if inputbttn == constants.SHOT_BUTTON :
             CARTON = True
-            animTake.show(extra, (0,0))
+            animTake.show(extraSurface, (0,0))
             capture()
-            animTake.hide(extra, (0,0))
+            animTake.hide(extraSurface, (0,0))
             CARTON = False
         elif inputbttn == constants.PLAY_BUTTON :
             IS_PLAYING = True
@@ -420,7 +420,7 @@ if __name__== "__main__":
     SETUP = True
     CARTON = False
     PREVIEW_SIZE = (0,0)
-    screen = None
+    screenSurface = None
     workingdir = None
     takenum = 0
     take = None
@@ -430,8 +430,8 @@ if __name__== "__main__":
     pygame.init()
     # setup
     ostype = detectOS()                 # int (0:RPi, 1:OSX, 2:WIN)
-    # frames buffer for animation preview
-    # --> ring buffer # duration in seconds for animation preview (last X seconds)
+    # frames buffer for animation previewSurface
+    # --> ring buffer # duration in seconds for animation previewSurface (last X seconds)
     maxFramesBuffer = int(user_settings.PREVIEW_DURATION*user_settings.FPS)
 
     # GPIO initialisation
@@ -453,18 +453,18 @@ if __name__== "__main__":
         FULLSCREEN = False
         DISPLAY_SIZE = (w, h)
         WINDOWED_SIZE = defineWindowedSize(DISPLAY_SIZE)
+        screenSurface = pygame.display.set_mode(WINDOWED_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN
         mylog.info("Window size : %s, %s" %(WINDOWED_SIZE[0], WINDOWED_SIZE[1]))
+
         PREVIEW_SIZE = definePreviewSize(myCamera.size, WINDOWED_SIZE)
+        previewSurface = pygame.Surface(PREVIEW_SIZE)
+        extraSurface = pygame.Surface(PREVIEW_SIZE)
         mylog.info("Preview size : %s, %s" %(PREVIEW_SIZE[0], PREVIEW_SIZE[1]))
-        preview = pygame.Surface(PREVIEW_SIZE)
-        screen = pygame.display.set_mode(WINDOWED_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN
-        pygame.display.set_allow_screensaver(False)
-        modes = pygame.display.list_modes()
+        # calc center of surface
         surf_center = (
-            (screen.get_width()-preview.get_width())/2,
-            (screen.get_height()-preview.get_height())/2
+            (screenSurface.get_width()-previewSurface.get_width())/2,
+            (screenSurface.get_height()-previewSurface.get_height())/2
         )
-        extra = pygame.Surface(PREVIEW_SIZE)
         # font and info elements
         pygame.font.init()
         defaultFont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
@@ -480,6 +480,9 @@ if __name__== "__main__":
         animSetup = animation.Animation(PREVIEW_SIZE, (0,0,0), 170, "building new take !") # size, color, alpha
         animQuit = animation.Animation(PREVIEW_SIZE, (0,0,0), 170, "quitting app !") # size, color, alpha
         animLongPress = animation.Animation(PREVIEW_SIZE, (0,0,0), 170, "")
+
+        # do not allow screenSurface saver
+        pygame.display.set_allow_screensaver(False)
 
     else :
         mylog.warning("Stopmotion tool run in headless mode !")
@@ -502,7 +505,7 @@ if __name__== "__main__":
         # function which do not need output display
         frameBuffer = myCamera.read()
         new_frame_time = time.time()
-        # then function needed only if output display is available (we have a screen)
+        # then function needed only if output display is available (we have a screenSurface)
         if outputdisplay is True :
             # pygame events
             for event in pygame.event.get():
@@ -520,18 +523,18 @@ if __name__== "__main__":
                         newTake()
                     if event.key == K_f and outputdisplay is True :
                         if not FULLSCREEN:
-                            screen = pygame.display.set_mode(DISPLAY_SIZE, pygame.FULLSCREEN)#modes[0]
+                            screenSurface = pygame.display.set_mode(DISPLAY_SIZE, pygame.FULLSCREEN)#modes[0]
                         else:
-                            screen = pygame.display.set_mode(WINDOWED_SIZE)
-                        pygame.display.flip()
+                            screenSurface = pygame.display.set_mode(WINDOWED_SIZE)
                         # recalc surf center 
                         #PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
-                        #preview = pygame.Surface(PREVIEW_SIZE)
+                        #previewSurface = pygame.Surface(PREVIEW_SIZE)
                         surf_center = (
                             (pygame.display.Info().current_w-PREVIEW_SIZE[0])/2,
                             (pygame.display.Info().current_h-PREVIEW_SIZE[1])/2
                         )
                         FULLSCREEN = not FULLSCREEN
+                        pygame.display.flip()
                     if event.key == K_b and outputdisplay is True :
                         wb = not wb
                     if event.key == K_q :
@@ -543,35 +546,35 @@ if __name__== "__main__":
                         quit()
                         finish = True
 
-            # switch between animation preview and onion skin view
+            # switch between animation previewSurface and onion skin view
             if IS_PLAYING is True :
                 displayAnimation()
             else:
                 displayCameraStream(frameBuffer)
 
-            screen.fill((0,0,0))
-            screen.blit(preview, surf_center)
+            screenSurface.fill((0,0,0))
+            screenSurface.blit(previewSurface, surf_center)
 
             if user_settings.show_console is True :
                 # calculate framerate
                 fps = 1/(new_frame_time-prev_frame_time) 
-                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  | %sx%s |  App framerate : %.2f |  wb : %s " %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), preview.get_width(),preview.get_height(), fps, wb)), True, (250, 0, 0))
-                screen.blit(console, (25, screen.get_height()-20))
+                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  | %sx%s |  App framerate : %.2f |  wb : %s " %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), previewSurface.get_width(),previewSurface.get_height(), fps, wb)), True, (250, 0, 0))
+                screenSurface.blit(console, (25, screenSurface.get_height()-20))
 
             if user_settings.show_infos is True :
-                temp_surface = pygame.Surface(infos_frame.get_size(),SRCALPHA)
-                temp_surface.fill((0,0,0,50))
-                temp_surface.blit(infos_frame,(0,0))
-                screen.blit(temp_surface, (20,20))
+                tempSurface = pygame.Surface(infos_frame.get_size(),SRCALPHA)
+                tempSurface.fill((0,0,0,50))
+                tempSurface.blit(infos_frame,(0,0))
+                screenSurface.blit(tempSurface, (20,20))
 
-                temp_surface = pygame.Surface(infos_take.get_size(),SRCALPHA)
-                temp_surface.fill((0,0,0,50))
-                temp_surface.blit(infos_take,(0,0))
-                screen.blit(temp_surface, (screen.get_width()-infos_take.get_size()[0]-20,20))
+                tempSurface = pygame.Surface(infos_take.get_size(),SRCALPHA)
+                tempSurface.fill((0,0,0,50))
+                tempSurface.blit(infos_take,(0,0))
+                screenSurface.blit(tempSurface, (screenSurface.get_width()-infos_take.get_size()[0]-20,20))
 
             if CARTON is True :
-                screen.blit(extra, surf_center)
-            #all_sprites.draw(screen)
+                screenSurface.blit(extraSurface, surf_center)
+            #all_sprites.draw(screenSurface)
             pygame.display.flip()
             prev_frame_time = new_frame_time
             # handle mouse move

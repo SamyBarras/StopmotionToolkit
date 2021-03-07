@@ -7,7 +7,7 @@
 --> Si pas de disque externe branché, l'ensemble des images seront sauvegardées sur le Desktop du boitier
 * Ecran [RECOMMANDé]
 --> Il y a deux ports micro HDMI, possibilité d'utiliser des adaptateurs DVI
---> Sans écran le boitier fonctionnera quand même mais pas de preview / pelure d'oignon
+--> Sans écran le boitier fonctionnera quand même mais pas de previewSurface / pelure d'oignon
 * Clavier, souris [OPTIONNEL]
 
 2) Brancher l'alimentation secteur sur le port USB-C
@@ -22,7 +22,7 @@
 
 # Interface
 Short press R : take
-Short press G : preview anim
+Short press G : previewSurface anim
 Long press R : new take
 Long press G : quit (shutdonw RPi)
 
@@ -30,17 +30,17 @@ Long press G : quit (shutdonw RPi)
     * la LED s'allume quand le programme de stopmotion est lancé
     * allumée : programme is running
     * clignote : pendant la capture d'image
-    * s'éteint puis se rallume pendant la preview de l'animation
+    * s'éteint puis se rallume pendant la previewSurface de l'animation
 
 # Headless mode :
 * Si la LED est allumée, c'est que le programme est lancé
 Sinon... il y a un problème. --> vérifier le log file
-* Le bouton vert (preview) ne sert qu'à éteindre (long press) le boitier, il n'y a pas de preview de l'animation
+* Le bouton vert (previewSurface) ne sert qu'à éteindre (long press) le boitier, il n'y a pas de previewSurface de l'animation
 
 # keyboard shortcuts
 c : show/hide console
 t : take
-p : preview anim
+p : previewSurface anim
 n : new take
 f : toogle fulsscreen (buggy)
 q : quit (return to command line / Desktop)

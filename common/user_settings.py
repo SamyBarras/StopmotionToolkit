@@ -2,7 +2,7 @@
 #                   STANDARD USERS PARAMETERS
 # ===========================================================
 FPS = 12 # framerate for your animations
-PREVIEW_DURATION = 2 # duration in seconds for the preview
+PREVIEW_DURATION = 2 # duration in seconds for the previewSurface
 ONIONSKIN = 3 # nth of frames to show in onion skin
 
 # file and directories naming conventions
