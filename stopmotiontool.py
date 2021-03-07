@@ -487,7 +487,7 @@ if __name__== "__main__":
         pygame.display.set_allow_screensaver(False)
 
         #
-        if os == 0 :
+        if ostype == 0 :
             subprocess.call("v4l2ucp") #we launch additional app to control webcam
 
     else :
