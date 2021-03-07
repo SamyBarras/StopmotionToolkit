@@ -257,20 +257,19 @@ def displayAnimation():
         IS_PLAYING=False
 
 def displayCameraStream(buffer):
-    global IS_PLAYING, wb
+    global IS_PLAYING, wb, screen
     # display video stream
     if buffer is not None :
         img = None
         if wb is True :
             img = image_processing.white_balance(buffer)
-            
         else :
             img = buffer
-        if FULLSCREEN :
-            img = image_processing.rescaleToDisplay(_c, scren.get_size())
-        else :
-            img = image_processing.rescaleToDisplay(_c, scren.get_size())
-
+        # if FULLSCREEN :
+        #     img = image_processing.rescaleToDisplay(img, screen.get_size())
+        # else :
+        #     img = image_processing.rescaleToDisplay(img, screen.get_size())
+        img = image_processing.rescaleToDisplay(img, screen.get_size())
         #img = image_processing.rescaleToDisplay(_c, SCREEN_SIZE)  
         preview.blit(img, (0,0))
 
