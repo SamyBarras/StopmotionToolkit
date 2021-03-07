@@ -528,12 +528,12 @@ if __name__== "__main__":
                             screenSurface = pygame.display.set_mode(WINDOWED_SIZE)
                         # recalc surf center 
                         #PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
-                        #previewSurface = pygame.Surface(PREVIEW_SIZE)
+                        previewSurface = pygame.Surface(PREVIEW_SIZE)
+                        FULLSCREEN = not FULLSCREEN
                         surf_center = (
                             (pygame.display.Info().current_w-PREVIEW_SIZE[0])/2,
                             (pygame.display.Info().current_h-PREVIEW_SIZE[1])/2
                         )
-                        FULLSCREEN = not FULLSCREEN
                         pygame.display.flip()
                     if event.key == K_b and outputdisplay is True :
                         wb = not wb
@@ -552,6 +552,8 @@ if __name__== "__main__":
             else:
                 displayCameraStream(frameBuffer)
 
+
+            # update screen
             screenSurface.fill((0,0,0))
             screenSurface.blit(previewSurface, surf_center)
 
