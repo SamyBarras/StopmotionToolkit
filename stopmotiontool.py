@@ -228,20 +228,31 @@ def defineWindowedSize(displaysize) :
     mylog.debug("windowed size = %s , %s" %(_w, _h))
     return (_w, _h)
 
-def definePreviewSize(camsize, displaysize) :
-    cam_w = camsize[0]
-    cam_h = camsize[1]
-    display_w = displaysize[0]
-    display_h = displaysize[1]
-    # if camera w is bigger than display w, we reduce its scale for preview
-    if cam_w > display_w :
-        scale_factor = display_w/float(cam_w)
-        return (int(cam_w*scale_factor),int(cam_h*scale_factor))
-    elif cam_h > display_h :
-        scale_factor = display_h/float(cam_h)
-        return (int(cam_w*scale_factor),int(cam_h*scale_factor))
-    else :
-        return (cam_w, cam_h)
+def definePreviewSize(camsize, displaysize):
+    ix, iy = (camsize[0], camsize[1])
+    bx, by = (displaysize[0], displaysize[1])
+    if ix > iy:
+        # fit to width
+        scale_factor = bx/float(ix)
+        sy = scale_factor * iy
+        if sy > by:
+            scale_factor = by/float(iy)
+            sx = scale_factor * ix
+            sy = by
+        else:
+            sx = bx
+    else:
+        # fit to height
+        scale_factor = by/float(iy)
+        sx = scale_factor * ix
+        if sx > bx:
+            scale_factor = bx/float(ix)
+            sx = bx
+            sy = scale_factor * iy
+        else:
+            sy = by
+
+    return (int(sx),int(sy))
 
 def displayAnimation():
     global IS_PLAYING
@@ -394,13 +405,12 @@ def quit():
     if user_settings.EXPORT_ANIM is True and frames is not None :
         mylog.info("Export of take \"%s\" as movie file using ffmpeg..." %take)
         image_processing.compileAnimation(workingdir, frames, take)
-    print("Goodbye Animator !")
+    mylog.info("Goodbye Animator !")
     sys.exit()
     # finally, we quit !
 
 
 if __name__== "__main__":
-
     dir_path = os.path.dirname(os.path.realpath(__file__))
     mylog.debug("script dir : %s" %dir_path)
     # global var setup
@@ -513,10 +523,11 @@ if __name__== "__main__":
                         else:
                             screen = pygame.display.set_mode(WINDOWED_SIZE)
                         # recalc surf center 
-                        PREVIEW_SIZE = definePreviewSize(myCamera.size, screen.get_size())
+                        PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
+                        preview = pygame.Surface(PREVIEW_SIZE)
                         surf_center = (
-                            (screen.get_width()-preview.get_width())/2,
-                            (screen.get_height()-preview.get_height())/2
+                            (pygame.display.Info().current_w-preview.get_width())/2,
+                            (pygame.display.Info().current_h-preview.get_height())/2
                         )
                         FULLSCREEN = not FULLSCREEN
                     if event.key == K_b and outputdisplay is True :
