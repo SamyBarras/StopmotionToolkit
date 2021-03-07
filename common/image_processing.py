@@ -20,10 +20,39 @@ def cv2ImageToSurface(cv2Image):
     surface = pygame.image.frombuffer(cv2Image.flatten(), size, format)
     return surface.convert_alpha() if format == 'RGBA' else surface.convert()
 
+def rescaleToDisplay(img, dim):
+    reduced = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    return cv2ImageToSurface(reduced)
 
-def rescaleToDisplay(img, display):
-    ix,iy = (img.shape[1],img.shape[0])
-    bx, by = (display[0], display[1])
+# def rescaleToDisplay(img, display):
+#     ix,iy = (img.shape[0], img.shape[1])
+#     bx, by = (display[0], display[1])
+#     if ix > iy:
+#         # fit to width
+#         scale_factor = bx/float(ix)
+#         sy = scale_factor * iy
+#         if sy > by:
+#             scale_factor = by/float(iy)
+#             sx = scale_factor * ix
+#             sy = by
+#         else:
+#             sx = bx
+#     else:
+#         # fit to height
+#         scale_factor = by/float(iy)
+#         sx = scale_factor * ix
+#         if sx > bx:
+#             scale_factor = bx/float(ix)
+#             sx = bx
+#             sy = scale_factor * iy
+#         else:
+#             sy = by
+#     reduced = cv2.resize(img, (int(sx),int(sy)), interpolation=cv2.INTER_AREA)
+#     return cv2ImageToSurface(reduced)
+            
+def rescaleFactor (imgsize, displaysize):
+    ix, iy = (imgsize[0], imgsize[1])
+    bx, by = (displaysize[0], displaysize[1])
     if ix > iy:
         # fit to width
         scale_factor = bx/float(ix)
@@ -44,10 +73,16 @@ def rescaleToDisplay(img, display):
             sy = scale_factor * iy
         else:
             sy = by
-    reduced = cv2.resize(img, (int(sx),int(sy)), interpolation=cv2.INTER_AREA)
-    return cv2ImageToSurface(reduced)
-            
     
+    x_scale = sx/float(ix)
+    y_scale = sy/float(iy)
+
+    _w = int(ix*x_scale)
+    _h = int(iy*y_scale)
+    dim = (_w,_h)
+
+    return dim
+
 def rescaleImg(image, mult):
     scale_percent = mult  # percent of original size
     width = int(image.shape[1] * scale_percent / 100)

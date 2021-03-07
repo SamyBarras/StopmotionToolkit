@@ -277,7 +277,8 @@ def displayCameraStream(buffer):
         else :
             img = buffer
 
-        img = image_processing.rescaleToDisplay(img, PREVIEW_SIZE)
+        #img = image_processing.rescaleToDisplay(img, PREVIEW_SIZE)
+        img = image_processing.rescaleToDisplay(img, rescale_factor)
         previewSurface.blit(img, (0,0))
 
     # display onion skin
@@ -465,6 +466,7 @@ if __name__== "__main__":
             (screenSurface.get_width()-previewSurface.get_width())/2,
             (screenSurface.get_height()-previewSurface.get_height())/2
         )
+        rescale_factor = image_processing.rescaleFactor (myCamera.size, PREVIEW_SIZE)
         # font and info elements
         pygame.font.init()
         defaultFont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
@@ -529,7 +531,6 @@ if __name__== "__main__":
                         # recalc surf center 
                         #PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
                         FULLSCREEN = not FULLSCREEN
-                        pygame.display.flip()
                     if event.key == K_b and outputdisplay is True :
                         wb = not wb
                     if event.key == K_q :
@@ -540,7 +541,7 @@ if __name__== "__main__":
                         myCamera.release()
                         quit()
                         finish = True
-            #
+            # should not be there...
             surf_center = (
                 (screenSurface.get_width()-PREVIEW_SIZE[0])/2,
                 (screenSurface.get_height()-PREVIEW_SIZE[1])/2
@@ -551,32 +552,35 @@ if __name__== "__main__":
             else:
                 displayCameraStream(frameBuffer)
 
-
-            # update screen
+            # update screen 
             screenSurface.fill((0,0,0))
             screenSurface.blit(previewSurface, surf_center)
 
             if user_settings.show_console is True :
                 # calculate framerate
-                fps = 1/(new_frame_time-prev_frame_time) 
-                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  | %sx%s |  App framerate : %.2f |  wb : %s " %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), previewSurface.get_width(),previewSurface.get_height(), fps, wb)), True, (250, 0, 0))
+                fps = 1/(new_frame_time-prev_frame_time)
+                fpsConsole = consoleFont.render(str("App fps : %s" %fps), True, (250, 0, 0))
+                screenSurface.blit(fpsConsole, (25, screenSurface.get_height()-40))
+                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  | Preview res : %sx%s |  White Balance : %s " %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), PREVIEW_SIZE[0], PREVIEW_SIZE[1], wb)), True, (250, 0, 0))
                 screenSurface.blit(console, (25, screenSurface.get_height()-20))
 
             if user_settings.show_infos is True :
-                tempSurface = pygame.Surface(infos_frame.get_size(),SRCALPHA)
+                tempSurface = pygame.Surface(infos_frame.get_size(), SRCALPHA)
                 tempSurface.fill((0,0,0,50))
                 tempSurface.blit(infos_frame,(0,0))
                 screenSurface.blit(tempSurface, (20,20))
 
-                tempSurface = pygame.Surface(infos_take.get_size(),SRCALPHA)
+                tempSurface = pygame.Surface(infos_take.get_size(), SRCALPHA)
                 tempSurface.fill((0,0,0,50))
                 tempSurface.blit(infos_take,(0,0))
                 screenSurface.blit(tempSurface, (screenSurface.get_width()-infos_take.get_size()[0]-20,20))
 
             if CARTON is True :
+                # extra informations given in "animation" class object
                 screenSurface.blit(extraSurface, surf_center)
-            #all_sprites.draw(screenSurface)
+                
             pygame.display.flip()
+            # update frame time for fps count
             prev_frame_time = new_frame_time
             # handle mouse move
             mouse_move = pygame.mouse.get_rel()
