@@ -553,7 +553,7 @@ if __name__== "__main__":
             if user_settings.show_console is True :
                 # calculate framerate
                 fps = 1/(new_frame_time-prev_frame_time) 
-                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  |  App framerate : %.2f |  wb : %s  |" %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), fps, wb)), True, (250, 0, 0))
+                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  | %sx%s |  App framerate : %.2f |  wb : %s " %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), preview.get_width(),preview.get_height(), fps, wb)), True, (250, 0, 0))
                 screen.blit(console, (25, screen.get_height()-20))
 
             if user_settings.show_infos is True :
