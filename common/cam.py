@@ -57,7 +57,7 @@ class cam(object):
         filename = os.path.join(target,"HQ",fname)
         cv2.imwrite(filename, tmp_frame)
         filename = os.path.join(target,fname)
-        cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame,50))
+        cv2.imwrite(filename, image_processing.rescaleImg(tmp_frame, 50))
         logging.info("Frame \"%s\" saved", fname)
         logging.debug("\"%s\" written!",filename)
         self.lastframe = image_processing.rescaleToDisplay(tmp_frame, display)
