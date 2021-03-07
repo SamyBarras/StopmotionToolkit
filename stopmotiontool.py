@@ -262,12 +262,16 @@ def displayCameraStream(buffer):
     if buffer is not None :
         img = None
         if wb is True :
-            _s = buffer
-            _c = image_processing.white_balance(_s)
-            img = image_processing.rescaleToDisplay(_c, SCREEN_SIZE)
-        else :
-            img = image_processing.rescaleToDisplay(buffer, SCREEN_SIZE)
+            img = image_processing.white_balance(buffer)
             
+        else :
+            img = buffer
+        if FULLSCREEN :
+            img = image_processing.rescaleToDisplay(_c, scren.get_size())
+        else :
+            img = image_processing.rescaleToDisplay(_c, scren.get_size())
+
+        #img = image_processing.rescaleToDisplay(_c, SCREEN_SIZE)  
         preview.blit(img, (0,0))
 
     # display onion skin
@@ -507,9 +511,9 @@ if __name__== "__main__":
                         newTake()
                     if event.key == K_f and outputdisplay is True :
                         if not FULLSCREEN:
-                            pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)#modes[0]
+                            screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)#modes[0]
                         else:
-                            pygame.display.set_mode(SCREEN_SIZE)
+                            screen = pygame.display.set_mode(SCREEN_SIZE)
                         # recalc surf center 
                         surf_center = (
                             (screen.get_width()-preview.get_width())/2,
