@@ -17,7 +17,8 @@ from common import *
 # logging setup
 mylog = logging.getLogger('pythonConfig')
 mylog.setLevel(log.LOG_LEVEL)
-logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log')
+#logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log')
+logFile = os.path.join(os.path.dirname(__file__),'stopmo.log')
 # append to log file if same day, or start from clean file
 if not os.path.exists(logFile) or log.is_file_older_than_x_days(logFile) :
     fh = logging.FileHandler(logFile, mode='w')
