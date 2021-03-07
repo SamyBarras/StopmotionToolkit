@@ -21,7 +21,7 @@ class CustomFormatter(logging.Formatter):
         formatter = ColoredFormatter(log_fmt)
         return formatter.format(record)
 
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 logging.root.setLevel(LOG_LEVEL)
 
 
