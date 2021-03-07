@@ -91,7 +91,6 @@ def streamConstructor (id, os=0, codec='MJPG', w=1920, h=1080, fps=30):
         cap.open(id, apiPreference=cv2.CAP_V4L2)
         cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1.0) # ELP camera -> OFF:1.0  / ON:3.0
         cap.set(cv2.CAP_PROP_AUTO_WB, 0) # 0 to turn off auto_white_balance
-        cap.set(cv2.CAP_PROP_EXPOSURE, 0.01)
     elif os == 1 :
         cap.open(id)
         cap.read()
