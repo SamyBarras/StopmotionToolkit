@@ -257,10 +257,18 @@ def displayAnimation():
         IS_PLAYING=False
 
 def displayCameraStream(buffer):
-    global IS_PLAYING
+    global IS_PLAYING, wb
     # display video stream
     if buffer is not None :
-        preview.blit(image_processing.rescaleToDisplay(buffer, SCREEN_SIZE), (0,0))
+        img = None
+        if wb is True :
+            _s = buffer
+            _c = image_processing.white_balance(_s)
+            img = image_processing.rescaleToDisplay(_c, SCREEN_SIZE)
+        else :
+            img = image_processing.rescaleToDisplay(buffer, SCREEN_SIZE)
+            
+        preview.blit(img, (0,0))
 
     # display onion skin
     if user_settings.ONIONSKIN >= 1 :
@@ -408,6 +416,7 @@ if __name__== "__main__":
     takenum = 0
     take = None
     infos_take = None
+    wb = False # white balance activation
     # initialise pygame
     pygame.init()
     # setup
@@ -436,10 +445,8 @@ if __name__== "__main__":
         mylog.info("Window size : %s", SCREEN_SIZE)
         preview = pygame.Surface(SCREEN_SIZE)
         screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
-        surf_center = (
-            (w-preview.get_width())/2,
-            (h-preview.get_height())/2
-        )
+        modes = pygame.display.list_modes()
+        FULLSCREEN = False
         surf_center = (
             (screen.get_width()-preview.get_width())/2,
             (screen.get_height()-preview.get_height())/2
@@ -471,8 +478,8 @@ if __name__== "__main__":
     # update texts for console and infos
     infos_take = defaultFont.render(workingdir, True, (255, 255, 255))
     infos_frame = defaultFont.render("Frame %s" %str(myCamera.frameCount).zfill(5), True, (255, 255, 255))
-    infos_cam = consoleFont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), False, (250, 0, 0), (0,0,0))
-    infos_fps = consoleFont.render("Animation framerate : " + str(user_settings.FPS), False, (250, 0, 0), (0,0,0))
+    infos_cam = consoleFont.render("Camera résolution : " + ' '.join(str(x) for x in myCamera.size), True, (250, 0, 0))
+    infos_fps = consoleFont.render("Animation framerate : " + str(user_settings.FPS), True, (250, 0, 0))
     # ============ ready to animate
     mylog.info("==== ready to animate :) =====")
     # main loop
@@ -499,7 +506,18 @@ if __name__== "__main__":
                         SETUP = True
                         newTake()
                     if event.key == K_f and outputdisplay is True :
-                        pygame.display.toggle_fullscreen()
+                        if not FULLSCREEN:
+                            pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)#modes[0]
+                        else:
+                            pygame.display.set_mode(SCREEN_SIZE)
+                        # recalc surf center 
+                        surf_center = (
+                            (screen.get_width()-preview.get_width())/2,
+                            (screen.get_height()-preview.get_height())/2
+                        )
+                        FULLSCREEN = not FULLSCREEN
+                    if event.key == K_b and outputdisplay is True :
+                        wb = not wb
                     if event.key == K_q :
                         myCamera.release()
                         quit()
@@ -521,21 +539,20 @@ if __name__== "__main__":
             if user_settings.show_console is True :
                 # calculate framerate
                 fps = 1/(new_frame_time-prev_frame_time) 
-                fpsconsole = consoleFont.render(str("App fps -> %.2f" % fps), False, (250, 0, 0), (0,0,0))
-                screen.blit(infos_cam, (25, screen.get_height()-50))
-                screen.blit(infos_fps, (25, screen.get_height()-75))
-                screen.blit(fpsconsole, (25, screen.get_height()-100))
+                console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  |  App framerate : %.2f |  wb : %s  |" %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), fps, wb)), True, (250, 0, 0))
+                screen.blit(console, (25, screen.get_height()-20))
 
             if user_settings.show_infos is True :
-                temp_surface = pygame.Surface(infos_take.get_size(),SRCALPHA)
-                temp_surface.fill((0,0,0,50))
-                temp_surface.blit(infos_take,(0,0))
-                screen.blit(temp_surface, (25,25))
-
                 temp_surface = pygame.Surface(infos_frame.get_size(),SRCALPHA)
                 temp_surface.fill((0,0,0,50))
                 temp_surface.blit(infos_frame,(0,0))
-                screen.blit(temp_surface, (25,50))
+                screen.blit(temp_surface, (20,20))
+
+                temp_surface = pygame.Surface(infos_take.get_size(),SRCALPHA)
+                temp_surface.fill((0,0,0,50))
+                temp_surface.blit(infos_take,(0,0))
+                screen.blit(temp_surface, (screen.get_width()-infos_take.get_size()[0]-20,20))
+
 
 
             if CARTON is True :

@@ -100,7 +100,9 @@ def streamConstructor (id, os=0, codec='MJPG', w=1920, h=1080, fps=30):
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
     cap.set(cv2.CAP_PROP_FPS, fps)
     # auto exposure and white balance
-    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75) # 0.75 value to turn off auto_exposure
+    ret_val , cap_for_exposure = cap.read()
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+    cap.set(cv2.CAP_PROP_EXPOSURE , -1)
     cap.set(cv2.CAP_PROP_AUTO_WB, 0) # 0 to turn off auto_white_balance
 
     return cap
