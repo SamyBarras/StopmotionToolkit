@@ -552,9 +552,7 @@ if __name__== "__main__":
                 temp_surface.fill((0,0,0,50))
                 temp_surface.blit(infos_take,(0,0))
                 screen.blit(temp_surface, (screen.get_width()-infos_take.get_size()[0]-20,20))
-
-
-
+                
             if CARTON is True :
                 screen.blit(extra, surf_center)
             #all_sprites.draw(screen)
