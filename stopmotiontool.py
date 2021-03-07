@@ -16,22 +16,21 @@ from common import *
 
 # logging setup
 mylog = logging.getLogger('pythonConfig')
-mylog.setLevel(log.LOG_LEVEL)
 #logFile = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'stopmo.log')
 logFile = os.path.join(os.path.dirname(__file__),'stopmo.log')
 # append to log file if same day, or start from clean file
 if not os.path.exists(logFile) or log.is_file_older_than_x_days(logFile) :
     fh = logging.FileHandler(logFile, mode='w')
 else :
-    fh = logging.FileHandler(logFile, mode='a')
-fh.setLevel(logging.INFO)
+    fh = logging.FileHandler(logFile, mode='w')
+fh.setLevel(log.LOG_LEVEL)
 fh.setFormatter(log.CustomFormatter())
 mylog.addHandler(fh)
 
 def detectOS ():
     ostype = None
     #print(sys.platform) alternative, will output : linux / darwin (osx) / win
-    mylog.debug("os : %s - %s ", os.uname()[1], os.uname()[4])
+    mylog.debug("os : %s - %s " %(os.uname()[1], os.uname()[4]))
     if (os.uname()[4].startswith("arm")) : # rpi
         ostype = 0
     elif (os.uname()[4].startswith("x86_64")) : # osx
@@ -62,7 +61,7 @@ def setupProjectDir():
         if tmp is not None and  psize > drivesize:
             drivepath = p.mountpoint
             drivesize = psize
-            mylog.debug("External drive found -> %s -> %s", drivepath, drivesize)
+            mylog.debug("External drive found -> %s -> %s" %(drivepath, drivesize))
             found = True
     if found is False :
         mylog.warning("External drive not found ! Project will be stored in Desktop...")
@@ -116,7 +115,7 @@ def setupTakeDir(projectdir, _t):
     
     # last checks before continuing
     if os.path.exists(workingdir) and os.path.exists(HQFilesDir):
-        mylog.info("Working directory : %s", workingdir)
+        mylog.info("Working directory : %s" %workingdir)
         return workingdir, _t
     else :
         # throw error --> can't setup working dir
@@ -130,7 +129,7 @@ def newTake () :
     #animSetup.show(extra, surf_center)
     # export last take as movie file
     if frames is not None and user_settings.EXPORT_ANIM is True :
-        mylog.info("Export of take \"%s\" as movie file using ffmpeg...", take)
+        mylog.info("Export of take \"%s\" as movie file using ffmpeg..." %take)
         image_processing.compileAnimation(workingdir, frames, take)
     # setup take and new dir
     workingdir, takenum = setupTakeDir(projectdir, takenum) # path of working dir
@@ -160,7 +159,7 @@ def getCameraDevice():
             cap.release()
             return arr
         else :
-            mylog.error("Camera not found !")
+            mylog.critical("Camera not found !")
             quit()
     else :
         id = -1
@@ -178,7 +177,7 @@ def getCameraDevice():
                     tmp_h = cap.get(4)
                     cap.release()
                     tmp_cam = [i,tmp_w, tmp_h]
-                    mylog.debug("cam %s -> (%s,%s)",i, tmp_w, tmp_h)
+                    mylog.debug("cam %s -> (%s,%s)" %(i, tmp_w, tmp_h))
                     if tmp_w > res_w :
                         res_w = tmp_w
                         arr = tmp_cam
@@ -186,10 +185,10 @@ def getCameraDevice():
 
         if id == -1 :
             # throw error here --> no camera found
-            mylog.error("Camera not found at all !")
+            mylog.critical("Camera not found at all !")
             quit()
         else :
-            mylog.info("Camera id : %s (%s , %s)", arr[0], arr[1], arr[2])
+            mylog.info("Camera id : %s (%s , %s)" %(arr[0], arr[1], arr[2]))
 
         return arr
 
@@ -201,13 +200,13 @@ def getMonitor ():
         drivers = ('directfb', 'fbcon', 'svgalib')
         found = False
         for driver in drivers:
-            mylog.debug("Trying \'%s\'", driver)
+            mylog.debug("Trying \'%s\'" %driver)
             if not os.getenv('SDL_VIDEODRIVER'):
                 os.putenv('SDL_VIDEODRIVER', driver)
             try:
                 pygame.display.init()
             except pygame.error:
-                mylog.debug('%s -> failed', driver)
+                mylog.debug('%s -> failed' %driver)
                 continue
             else :
                 found = True
@@ -216,33 +215,33 @@ def getMonitor ():
             #raise Exception('No suitable video driver found.')
             return False, 0, 0
         else :
-            mylog.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
+            mylog.info("Screen resolution : %s - %s" %(pygame.display.Info().current_w, pygame.display.Info().current_h))
             return True, pygame.display.Info().current_w, pygame.display.Info().current_h
     else :
-        mylog.info("Screen resolution : %s - %s", pygame.display.Info().current_w, pygame.display.Info().current_h)
+        mylog.info("Screen resolution : %s - %s" %(pygame.display.Info().current_w, pygame.display.Info().current_h))
         return True, pygame.display.Info().current_w, pygame.display.Info().current_h
 
+def defineWindowedSize(displaysize) :
+    scale_factor = 0.65 #in windowed mode, the window will be twice smaller than the screen
+    _w = int(displaysize[0]*scale_factor)
+    _h = int(displaysize[1]*scale_factor)
+    mylog.debug("windowed size = %s , %s" %(_w, _h))
+    return (_w, _h)
 
-def defineDisplaySize(camsize, screen_w, screen_h) :
+def definePreviewSize(camsize, displaysize) :
     cam_w = camsize[0]
     cam_h = camsize[1]
-    if ostype == 0 : # rpi
-        if cam_w > screen_w :
-            if screen_w > 1024 :
-                return (int(screen_w/2), int(screen_h/2))
-            else :
-                return (screen_w, screen_h)
-        else :
-            if cam_w > 1024 :
-                return (int(cam_w/2), int(cam_h/2))
-            else :
-                return (cam_w, cam_h)
+    display_w = displaysize[0]
+    display_h = displaysize[1]
+    # if camera w is bigger than display w, we reduce its scale for preview
+    if cam_w > display_w :
+        scale_factor = display_w/float(cam_w)
+        return (int(cam_w*scale_factor),int(cam_h*scale_factor))
+    elif cam_h > display_h :
+        scale_factor = display_h/float(cam_h)
+        return (int(cam_w*scale_factor),int(cam_h*scale_factor))
     else :
-        # not rpi, no speed issue
-        if cam_w > screen_w :
-            return (int(screen_w), int(screen_h))
-        else :
-            return (cam_w, cam_h)
+        return (cam_w, cam_h)
 
 def displayAnimation():
     global IS_PLAYING
@@ -257,7 +256,7 @@ def displayAnimation():
         IS_PLAYING=False
 
 def displayCameraStream(buffer):
-    global IS_PLAYING, wb, screen
+    global IS_PLAYING, wb, PREVIEW_SIZE
     # display video stream
     if buffer is not None :
         img = None
@@ -265,12 +264,9 @@ def displayCameraStream(buffer):
             img = image_processing.white_balance(buffer)
         else :
             img = buffer
-        # if FULLSCREEN :
-        #     img = image_processing.rescaleToDisplay(img, screen.get_size())
-        # else :
-        #     img = image_processing.rescaleToDisplay(img, screen.get_size())
-        img = image_processing.rescaleToDisplay(img, screen.get_size())
-        #img = image_processing.rescaleToDisplay(_c, SCREEN_SIZE)  
+
+        img = image_processing.rescaleToDisplay(img, PREVIEW_SIZE)
+        #img = image_processing.rescaleToDisplay(_c, PREVIEW_SIZE)  
         preview.blit(img, (0,0))
 
     # display onion skin
@@ -317,7 +313,7 @@ def capture() :
     IS_SHOOTING = True
     #animTake.show(extra, surf_center)
     if outputdisplay is True :
-        myCamera.capturedisp(SCREEN_SIZE, workingdir, take)
+        myCamera.capturedisp(PREVIEW_SIZE, workingdir, take)
     else :
         myCamera.capture(workingdir, take)
     #
@@ -396,7 +392,7 @@ def quit():
         GPIO.cleanup()
     # export animation before quitting totally
     if user_settings.EXPORT_ANIM is True and frames is not None :
-        mylog.info("Export of take \"%s\" as movie file using ffmpeg...", take)
+        mylog.info("Export of take \"%s\" as movie file using ffmpeg..." %take)
         image_processing.compileAnimation(workingdir, frames, take)
     print("Goodbye Animator !")
     sys.exit()
@@ -406,14 +402,14 @@ def quit():
 if __name__== "__main__":
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    mylog.debug(dir_path)
+    mylog.debug("script dir : %s" %dir_path)
     # global var setup
     frames = None # framebuffer for animation
     IS_PLAYING = False
     IS_SHOOTING = False
     SETUP = True
     CARTON = False
-    SCREEN_SIZE = (0,0)
+    PREVIEW_SIZE = (0,0)
     screen = None
     workingdir = None
     takenum = 0
@@ -444,17 +440,20 @@ if __name__== "__main__":
     outputdisplay, w, h = getMonitor () # boolean, width, height
     # not in headless mode
     if outputdisplay is True:
-        SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
-        mylog.info("Window size : %s", SCREEN_SIZE)
-        preview = pygame.Surface(SCREEN_SIZE)
-        screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
-        modes = pygame.display.list_modes()
         FULLSCREEN = False
+        DISPLAY_SIZE = (w, h)
+        WINDOWED_SIZE = defineWindowedSize(DISPLAY_SIZE)
+        mylog.info("Window size : %s, %s" %(WINDOWED_SIZE[0], WINDOWED_SIZE[1]))
+        PREVIEW_SIZE = definePreviewSize(myCamera.size, WINDOWED_SIZE)
+        mylog.info("Preview size : %s, %s" %(PREVIEW_SIZE[0], PREVIEW_SIZE[1]))
+        preview = pygame.Surface(PREVIEW_SIZE)
+        screen = pygame.display.set_mode(WINDOWED_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
+        modes = pygame.display.list_modes()
         surf_center = (
             (screen.get_width()-preview.get_width())/2,
             (screen.get_height()-preview.get_height())/2
         )
-        extra = pygame.Surface(SCREEN_SIZE)
+        extra = pygame.Surface(PREVIEW_SIZE)
         # font and info elements
         pygame.font.init()
         defaultFont = pygame.font.SysFont(pygame.font.get_default_font(), 30)
@@ -466,10 +465,10 @@ if __name__== "__main__":
         pygame.mouse.get_rel()
 
         # ==== sprites ======
-        animTake = animation.Animation(SCREEN_SIZE, (255,0,0), 128, "") # size, color, alpha
-        animSetup = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "building new take !") # size, color, alpha
-        animQuit = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "quitting app !") # size, color, alpha
-        animLongPress = animation.Animation(SCREEN_SIZE, (0,0,0), 170, "")
+        animTake = animation.Animation(PREVIEW_SIZE, (255,0,0), 128, "") # size, color, alpha
+        animSetup = animation.Animation(PREVIEW_SIZE, (0,0,0), 170, "building new take !") # size, color, alpha
+        animQuit = animation.Animation(PREVIEW_SIZE, (0,0,0), 170, "quitting app !") # size, color, alpha
+        animLongPress = animation.Animation(PREVIEW_SIZE, (0,0,0), 170, "")
 
     else :
         mylog.warning("Stopmotion tool run in headless mode !")
@@ -510,10 +509,11 @@ if __name__== "__main__":
                         newTake()
                     if event.key == K_f and outputdisplay is True :
                         if not FULLSCREEN:
-                            screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)#modes[0]
+                            screen = pygame.display.set_mode(DISPLAY_SIZE, pygame.FULLSCREEN)#modes[0]
                         else:
-                            screen = pygame.display.set_mode(SCREEN_SIZE)
+                            screen = pygame.display.set_mode(WINDOWED_SIZE)
                         # recalc surf center 
+                        PREVIEW_SIZE = definePreviewSize(myCamera.size, screen.get_size())
                         surf_center = (
                             (screen.get_width()-preview.get_width())/2,
                             (screen.get_height()-preview.get_height())/2
