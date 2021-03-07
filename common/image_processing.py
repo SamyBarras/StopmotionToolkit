@@ -44,7 +44,6 @@ def rescaleToDisplay(img, display):
             sy = scale_factor * iy
         else:
             sy = by
-    
     reduced = cv2.resize(img, (int(sx),int(sy)), interpolation=cv2.INTER_AREA)
     return cv2ImageToSurface(reduced)
             

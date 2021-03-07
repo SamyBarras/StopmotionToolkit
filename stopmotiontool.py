@@ -261,17 +261,14 @@ def definePreviewSize(camsize, displaysize):
 def displayAnimation():
     global IS_PLAYING
     while IS_PLAYING :
-        #animTake.change()
-        #all_sprites.update()
         for i in frames : # frames is pygame.surface array           
             screen.blit(i, surf_center)
-            #all_sprites.draw(screen)
             pygame.display.flip()
             time.sleep(1/user_settings.FPS) # to keep framerate 
         IS_PLAYING=False
 
 def displayCameraStream(buffer):
-    global IS_PLAYING, wb, PREVIEW_SIZE
+    global IS_PLAYING
     # display video stream
     if buffer is not None :
         img = None
@@ -281,7 +278,6 @@ def displayCameraStream(buffer):
             img = buffer
 
         img = image_processing.rescaleToDisplay(img, PREVIEW_SIZE)
-        #img = image_processing.rescaleToDisplay(_c, PREVIEW_SIZE)  
         preview.blit(img, (0,0))
 
     # display onion skin
@@ -522,16 +518,19 @@ if __name__== "__main__":
                         SETUP = True
                         newTake()
                     if event.key == K_f and outputdisplay is True :
+                        pygame.display.quit()
+                        pygame.display.init()
                         if not FULLSCREEN:
                             screen = pygame.display.set_mode(DISPLAY_SIZE, pygame.FULLSCREEN)#modes[0]
                         else:
                             screen = pygame.display.set_mode(WINDOWED_SIZE)
+                        pygame.display.flip()
                         # recalc surf center 
-                        PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
-                        preview = pygame.Surface(PREVIEW_SIZE)
+                        #PREVIEW_SIZE = definePreviewSize(myCamera.size, (pygame.display.Info().current_w, pygame.display.Info().current_h))
+                        #preview = pygame.Surface(PREVIEW_SIZE)
                         surf_center = (
-                            (pygame.display.Info().current_w-preview.get_width())/2,
-                            (pygame.display.Info().current_h-preview.get_height())/2
+                            (pygame.display.Info().current_w-PREVIEW_SIZE[0])/2,
+                            (pygame.display.Info().current_h-PREVIEW_SIZE[1])/2
                         )
                         FULLSCREEN = not FULLSCREEN
                     if event.key == K_b and outputdisplay is True :
