@@ -24,9 +24,8 @@ def cv2ImageToSurface(cv2Image):
 def rescaleToDisplay(img, display):
     global screen
     ix,iy = (img.shape[1],img.shape[0])
-    bx = display[0]
-    by = display[1]
-    if ix > iy:
+    bx, by = (display[0], display[1])
+    if ix > bx:
         # fit to width
         scale_factor = bx/float(ix)
         sy = scale_factor * iy

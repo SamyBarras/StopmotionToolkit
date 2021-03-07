@@ -444,7 +444,7 @@ if __name__== "__main__":
         SCREEN_SIZE = defineDisplaySize(myCamera.size, w, h)
         mylog.info("Window size : %s", SCREEN_SIZE)
         preview = pygame.Surface(SCREEN_SIZE)
-        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
+        screen = pygame.display.set_mode(SCREEN_SIZE) # , pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE #  pygame.FULLSCREEN 
         modes = pygame.display.list_modes()
         FULLSCREEN = False
         surf_center = (
