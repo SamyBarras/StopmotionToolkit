@@ -11,7 +11,7 @@ Clone project's repo from GitHub :
 
 ``` bash
 cd /home/pi/Documents/
-sudo git clone https://github.com/samybarras/stopmotiontool
+git clone https://github.com/samybarras/stopmotiontool
 ```
 
 When project is downloaded, we can continue the installation :
