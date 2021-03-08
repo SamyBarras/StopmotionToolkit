@@ -45,6 +45,9 @@ hdmi_force_hotplug=1:0
 hdmi_group=2:0
 # Pretend that the monitor has resolution 1920x1080
 hdmi_mode=82:0
+# uncomment to increase signal to HDMI, if you have interference, blanking, or
+# no display
+config_hdmi_boost=4 #boost hdmi signal to use vga adaptator
 ```
 
 ### Launch app at startup (optional)
