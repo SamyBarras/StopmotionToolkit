@@ -1,16 +1,19 @@
 # ===========================================================
 #                   STANDARD USERS PARAMETERS
 # ===========================================================
-FPS = 12 # framerate for your animations
-PREVIEW_DURATION = 2 # duration in seconds for the previewSurface
-ONIONSKIN = 3 # nth of frames to show in onion skin
+# Project and takes setup
+USEPROJECTFOLDER = False    # True will create a directory where to put takes, False will save takes into "stopmotion" folder
+MAKEUNIKPROJECT = False     # Create numbered projects folders if existing
+PROJECT_NAME = "PROJECT"    # default string used for project directory if none (empty string) set by user
+TAKE_NAME = "take"          # template name for takes, will be saved : "PROJECT / take_00 / take00_[######].png"
 
-# file and directories naming conventions
-PROJECT_NAME = "" # string added to project directory (YYYYMMDD_PROJECT_NAME)
-TAKE_NAME = "take" # template name for takes, will be saved : "projectDir / take_00 / take00_[######].png"
+# animation setup
+FPS = 12                    # framerate for your animations
+PREVIEW_DURATION = 2        # duration in seconds for the previewSurface
+ONIONSKIN = 3               # nth of frames to show in onion skin
 
 # output
-EXPORT_ANIM = True # "True" will export latest take to a .mp4 movie file in take's directory when closing app
+EXPORT_ANIM = True          # Set to True if you want to generate .mp4 file at end of each take
 
 
 # ===========================================================
@@ -18,13 +21,15 @@ EXPORT_ANIM = True # "True" will export latest take to a .mp4 movie file in take
 # (do not change these if you're not confident with the app)
 # ===========================================================
 # WEBCAM DEBUG
-# change this if needed of a specific webcamera (set to True)
-# 0 will be built-in camera OR first plugged camera
-forceCamera = False
-camIndex = 0
-# CAMERA CODEC
+# 
+forceCamera = False         # Set to True if you want to force the use of a specific camera index
+camIndex = 0                # Camera index used if "forceCamera" set to True
+
+# ===========================================================
+#                     EXTRA PARAMETERS
+# (do not change these if you're not confident with the app)
+# ===========================================================
 # DEBUG / INFOS
-show_console = False
-show_infos = True
-# shutdown the computer @ end (only for raspberry pi)
-shutdown_rpi = False
+show_console = False        # debug console
+show_infos = True           # infos (take + project idrectory)
+shutdown_rpi = False        # shutdown the RPi when closing the app
