@@ -190,6 +190,7 @@ def setupTakeDir(projectdir, _t):
     
     if not os.path.exists(projectdir) :
         os.makedirs(projectdir)
+        
     total, used, free = shutil.disk_usage(projectdir)
     if free < 314572800 :
         ERROR = True
