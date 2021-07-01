@@ -12,9 +12,6 @@ if ifconfig | grep -i "eth0"  > /dev/null 2>&1; then
                 ifdown --force eth0
                 exit
         fi
-
-
-        exit
 else
         if [ $SPEED -ge 100 ]; then
                 echo "Cable connection detected. Bringing up eth0..."
