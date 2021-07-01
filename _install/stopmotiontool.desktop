@@ -2,7 +2,7 @@
 Type=Application
 Encoding=UTF-8
 Name=StopmotionTool
-Exec=python3 /home/pi/Documents/stopmotiontool/stopmotiontool.py
-Icon=/home/pi/Documents/stopmotiontool/_install/_images_/icon.png
+Exec=bash /home/pi/Documents/stopmotiontoolkit/startup.sh
+Icon=/home/pi/Documents/stopmotiontoolkit/_install/_images_/icon.png
 StartupNotify=True
 Terminal=False

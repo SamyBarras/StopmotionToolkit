@@ -8,10 +8,10 @@ setuptools.setup(
     version="1.0.0",
     author="Samy Barras",
     author_email="samy.barras@gmail.com",
-    description="Stopmotioontool package for Stopmo Toolkit by Mamatus Collective",
+    description="Stopmotioontool package for Stopmotion Toolkit by Mamatus Collective",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/samybarras/stopmotiontool",
+    url="https://github.com/samybarras/stopmotiontoolkit",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
