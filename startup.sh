@@ -25,6 +25,7 @@ else
                 echo "Error: No cable connected."
                 exit
         fi
+        
+python3 /home/pi/Documents/stopmotiontoolkit/stopmotiontool.py
 fi
 exit
-python3 /home/pi/Documents/stopmotiontoolkit/stopmotiontool.py
