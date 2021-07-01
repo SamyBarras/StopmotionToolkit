@@ -25,7 +25,10 @@ else
                 echo "Error: No cable connected."
                 exit
         fi
-        
-python3 /home/pi/Documents/stopmotiontoolkit/stopmotiontool.py
+
+cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd
+echo "ready to start"
+python3 stopmotiontool.py
+
 fi
 exit
