@@ -10,7 +10,7 @@ if ifconfig | grep -i "eth0"  > /dev/null 2>&1; then
         else
                 echo "Error: No cable connected. Bringing down eth0"
                 ifdown --force eth0
-                exit
+                #exit
         fi
 else
         if [ $SPEED -ge 100 ]; then
@@ -20,7 +20,7 @@ else
                 git pull https://github.com/SamyBarras/stopmotiontoolkit
         else
                 echo "Error: No cable connected."
-                exit
+                #exit
         fi
 
 cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd
