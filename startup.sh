@@ -22,10 +22,10 @@ else
                 echo "Error: No cable connected."
                 #exit
         fi
+fi
 
 cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd
 echo "ready to start"
 python3 stopmotiontool.py
 
-fi
 exit
