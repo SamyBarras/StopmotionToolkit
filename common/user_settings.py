@@ -5,7 +5,7 @@
 USEPROJECTFOLDER = False    # True will create a directory where to put takes, False will save takes into "stopmotion" folder
 MAKEUNIKPROJECT = False     # Create numbered projects folders if existing
 PROJECT_NAME = "PROJECT"    # default string used for project directory if none (empty string) set by user
-TAKE_NAME = "take"          # template name for takes, will be saved : "PROJECT / take_00 / take00_[######].png"
+TAKE_NAME = "anim"          # template name for takes, will be saved : "PROJECT / take_00 / take00_[######].png"
 
 # animation setup
 FPS = 12                    # framerate for your animations
@@ -30,6 +30,6 @@ camIndex = 0                # Camera index used if "forceCamera" set to True
 # (do not change these if you're not confident with the app)
 # ===========================================================
 # DEBUG / INFOS
-show_console = True        # debug console
-show_infos = False           # infos (take + project idrectory)
+show_console = False        # debug console
+show_infos = True           # infos (take + project idrectory)
 shutdown_rpi = False        # shutdown the RPi when closing the app
