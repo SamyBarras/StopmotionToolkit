@@ -662,7 +662,7 @@ if __name__== "__main__":
                 screenSurface.blit(fpsConsole, (25, screenSurface.get_height()-40))
                 console = consoleFont.render(str("Cam Résolution : %s  |  Anim FPS : %s  | Preview res : %sx%s |  White Balance : %s " %('x'.join(str(x) for x in myCamera.size), str(user_settings.FPS), PREVIEW_SIZE[0], PREVIEW_SIZE[1], wb)), True, (250, 0, 0))
                 screenSurface.blit(console, (25, screenSurface.get_height()-20))
-
+            
             if user_settings.show_infos is True :
                 tempSurface = pygame.Surface(infos_frame.get_size(), SRCALPHA)
                 tempSurface.fill((0,0,0,50))
