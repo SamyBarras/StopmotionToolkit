@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env /bin/bash
 #Extract speed info from ethtool. If speed is 10 Mb/s, no cable is connected. If it is 100 Mb/s, there is a cable present.
 SPEED=`ethtool eth0 | grep -i "Speed" | awk '{print $2}' | grep -o '[0-9]*'`
 if ifconfig | grep -i "eth0"  > /dev/null 2>&1; then
