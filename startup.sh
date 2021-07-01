@@ -26,5 +26,5 @@ else
                 exit
         fi
 fi
-python3 /home/pi/Documents/stopmotiontoolkit/stopmotiontool.py
 exit
+python3 /home/pi/Documents/stopmotiontoolkit/stopmotiontool.py
