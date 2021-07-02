@@ -695,10 +695,7 @@ if __name__== "__main__":
                 pygame.mouse.set_visible(True)
             
 
-
-if ostype == 0 and user_settings.shutdown_rpi :
-    # turn off RPi at end
-    subprocess.call("sudo shutdown -h now", shell=True) # turn off computer !
-
-
-    
+def turnoff ():
+    if ostype == 0 and user_settings.shutdown_rpi :
+        # turn off RPi at end
+        subprocess.call("sudo shutdown -h now", shell=True) # turn off computer !

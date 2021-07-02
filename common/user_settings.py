@@ -32,4 +32,4 @@ camIndex = 0                # Camera index used if "forceCamera" set to True
 # DEBUG / INFOS
 show_console = False        # debug console
 show_infos = True           # infos (take + project idrectory)
-shutdown_rpi = False        # shutdown the RPi when closing the app
+shutdown_rpi = True        # shutdown the RPi when closing the app
